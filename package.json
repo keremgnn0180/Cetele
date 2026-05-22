@@ -1,0 +1,88 @@
+{
+  "name": "cetele",
+  "version": "1.0.0",
+  "description": "Modern ve sade masaüstü Çetele uygulaması",
+  "main": "main.js",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"electron .\"",
+    "vite-build": "vite build",
+    "build": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder",
+    "installer": "node -e \"try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --win nsis",
+    "installer:portable": "node -e \"try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --win portable",
+    "package": "electron-builder --dir",
+    "preview": "vite preview",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.3.9",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.15.0",
+    "sql.js": "^1.12.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.8.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^8.2.2",
+    "electron": "34.0.2",
+    "electron-builder": "24.13.3",
+    "png-to-ico": "^2.1.8",
+    "sharp": "^0.34.5",
+    "vite": "^6.0.5"
+  },
+  "keywords": [
+    "tarla",
+    "masraf",
+    "takip",
+    "electron",
+    "react",
+    "sqlite"
+  ],
+  "author": "Antigravity",
+  "license": "ISC",
+  "build": {
+    "appId": "com.cetele.app",
+    "productName": "Çetele",
+    "executableName": "cetele",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "preload.js",
+      "database.js",
+      "package.json",
+      "assets/**/*"
+    ],
+    "icon": "assets/icon.ico",
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "keremgnn0180",
+        "repo": "Cetele"
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "deleteAppDataOnUninstall": false,
+      "shortcutName": "Çetele",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "artifactName": "Çetele Setup ${version}.exe"
+    }
+  }
+}
