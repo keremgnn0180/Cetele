@@ -1,6 +1,6 @@
-# Çetele
+﻿# Çetele
 
-Çetele, tarım işletmeleri için geliştirilmiş modern bir masaüstü takip uygulamasıdır.  
+Çetele, tarım işletmeleri için geliştirilmiş modern bir masaüstü takip uygulamasıdır.
 Tarla, ürün, ekim, masraf ve hasat/satış kayıtlarını tek yerden yönetmeyi sağlar.
 
 ## Özellikler
@@ -39,7 +39,7 @@ npm install
 npm run dev
 ```
 
-Bu komut Vite ve Electron’u birlikte başlatır.
+Bu komut Vite ve Electron'u birlikte başlatır.
 
 ## Üretim Build
 
@@ -49,8 +49,8 @@ npm run build
 
 Build çıktıları:
 
-- `dist/` → frontend bundle
-- `release/` → Windows paketleri ve setup
+- `dist/` -> frontend bundle
+- `release/` -> Windows paketleri ve setup
 
 ## Installer Üretimi
 
@@ -85,10 +85,9 @@ Detaylı dağıtım notları için:
 
 ## Sürümleme ve Yayın
 
-`package.json` içindeki `build.publish` alanı GitHub release altyapısına göre ayarlanmıştır.  
+`package.json` içindeki `build.publish` alanı GitHub release altyapısına göre ayarlanmıştır.
 Yayın sürecinde repo sahipliği ve kimlik doğrulama ayarlarının doğrulanması gerekir.
 
 ## Lisans
 
 ISC
-
