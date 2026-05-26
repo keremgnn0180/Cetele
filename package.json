@@ -1,6 +1,6 @@
 {
   "name": "cetele",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Modern ve sade masaüstü Çetele uygulaması",
   "main": "main.js",
   "scripts": {
