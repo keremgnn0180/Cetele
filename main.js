@@ -9,8 +9,8 @@ try {
 } catch (err) {
   console.log('Auto updater yÃƒÂ¼klenemedi:', err.message);
 }
-app.setName('Çetele');
-app.setPath('userData', path.join(app.getPath('appData'), 'Çetele'));
+app.setName('Cetele');
+app.setPath('userData', path.join(app.getPath('appData'), 'Cetele'));
 app.setAppUserModelId('com.cetele.app');
 const fs = require('fs');
 const database = require('./database.js');
@@ -24,6 +24,8 @@ let isUpdateDialogVisible = false;
 log.transports.file.level = 'info';
 if (autoUpdater) {
   autoUpdater.logger = log;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
 }
 
 function sendUpdateEvent(channel, payload = {}) {
@@ -44,6 +46,7 @@ function showNativeNotification(title, body) {
 
 function setupAutoUpdaterEvents() {
   if (!autoUpdater) return;
+
   autoUpdater.on('checking-for-update', () => {
     updateStatus = 'Kontrol ediliyor';
     sendUpdateEvent('update:checking-for-update', { checkedAt: new Date().toISOString() });
@@ -53,7 +56,7 @@ function setupAutoUpdaterEvents() {
   autoUpdater.on('update-available', (info) => {
     updateStatus = 'Guncelleme bulundu';
     sendUpdateEvent('update:available', { version: info?.version || null, releasedAt: info?.releaseDate || null });
-    showNativeNotification('Yeni gÃƒÆ’Ã‚Â¼ncelleme bulundu', 'ÃƒÆ’Ã¢â‚¬Â¡etele yeni sÃƒÆ’Ã‚Â¼rÃƒÆ’Ã‚Â¼mÃƒÆ’Ã‚Â¼ indiriliyor...');
+    showNativeNotification('Yeni guncelleme bulundu', 'Cetele yeni surumu indiriyor...');
     log.info('update-available', info);
   });
 
@@ -73,7 +76,7 @@ function setupAutoUpdaterEvents() {
   autoUpdater.on('update-downloaded', async (info) => {
     updateStatus = 'Guncelleme hazir';
     sendUpdateEvent('update:downloaded', { version: info?.version || null });
-    showNativeNotification('GÃƒÆ’Ã‚Â¼ncelleme hazÃƒâ€Ã‚Â±r', 'Uygulama yeniden baÃƒâ€¦Ã…Â¸latÃƒâ€Ã‚Â±ldÃƒâ€Ã‚Â±Ãƒâ€Ã…Â¸Ãƒâ€Ã‚Â±nda yeni sÃƒÆ’Ã‚Â¼rÃƒÆ’Ã‚Â¼m kurulacak.');
+    showNativeNotification('Guncelleme hazir', 'Uygulama kapatildiginda yeni surum kurulacak.');
     log.info('update-downloaded', info);
 
     if (isUpdateDialogVisible) return;
@@ -81,12 +84,12 @@ function setupAutoUpdaterEvents() {
     try {
       const result = await dialog.showMessageBox({
         type: 'info',
-        buttons: ['Ãƒâ€¦Ã‚Âimdi Yeniden BaÃƒâ€¦Ã…Â¸lat', 'Daha Sonra'],
+        buttons: ['Simdi Yeniden Baslat', 'Daha Sonra'],
         defaultId: 0,
         cancelId: 1,
-        title: 'Ãƒâ€¡etele',
-        message: 'Uygulama yeniden baÃƒâ€¦Ã…Â¸latÃƒâ€Ã‚Â±ldÃƒâ€Ã‚Â±Ãƒâ€Ã…Â¸Ãƒâ€Ã‚Â±nda yeni sÃƒÆ’Ã‚Â¼rÃƒÆ’Ã‚Â¼m kurulacak.',
-        detail: 'GÃƒÆ’Ã‚Â¼ncellemeyi Ãƒâ€¦Ã…Â¸imdi kurmak iÃƒÆ’Ã‚Â§in yeniden baÃƒâ€¦Ã…Â¸latabilirsiniz.',
+        title: 'Cetele',
+        message: 'Uygulama yeniden baslatildiginda yeni surum kurulacak.',
+        detail: 'Guncellemeyi simdi kurmak icin yeniden baslatabilirsiniz.'
       });
       if (result.response === 0) {
         autoUpdater.quitAndInstall();
@@ -100,7 +103,7 @@ function setupAutoUpdaterEvents() {
 
   autoUpdater.on('error', (err) => {
     updateStatus = 'Hata';
-    sendUpdateEvent('update:error', { message: err?.message || 'Bilinmeyen gÃƒÆ’Ã‚Â¼ncelleme hatasÃƒâ€Ã‚Â±' });
+    sendUpdateEvent('update:error', { message: err?.message || 'Bilinmeyen guncelleme hatasi' });
     log.error('autoUpdater error:', err);
   });
 }
@@ -110,7 +113,7 @@ async function checkForUpdates(source = 'startup') {
   try {
     if (!autoUpdater) {
       updateStatus = 'Updater modulu yuklenemedi';
-      return { ok: false, error: 'electron-updater bulunamadÃ„Â±' };
+      return { ok: false, error: 'electron-updater bulunamadi' };
     }
     if (!app.isPackaged) {
       updateStatus = 'Gelistirme modunda atlandi';
@@ -124,8 +127,8 @@ async function checkForUpdates(source = 'startup') {
   } catch (err) {
     updateStatus = 'Hata';
     log.error('checkForUpdates error:', err);
-    sendUpdateEvent('update:error', { message: err?.message || 'GÃƒÆ’Ã‚Â¼ncelleme kontrolÃƒÆ’Ã‚Â¼ baÃƒâ€¦Ã…Â¸arÃƒâ€Ã‚Â±sÃƒâ€Ã‚Â±z' });
-    return { ok: false, error: err?.message || 'GÃƒÆ’Ã‚Â¼ncelleme kontrolÃƒÆ’Ã‚Â¼ baÃƒâ€¦Ã…Â¸arÃƒâ€Ã‚Â±sÃƒâ€Ã‚Â±z' };
+    sendUpdateEvent('update:error', { message: err?.message || 'Guncelleme kontrolu basarisiz' });
+    return { ok: false, error: err?.message || 'Guncelleme kontrolu basarisiz' };
   }
 }
 
@@ -135,7 +138,7 @@ function createWindow() {
     width: 1200,
     height: 800,
     minWidth: 1000,
-    title: 'Ãƒâ€¡etele',
+    title: 'Cetele',
     minHeight: 700,
     show: false,
     icon: path.join(__dirname, 'assets', 'icon.ico'),
@@ -174,9 +177,9 @@ app.whenReady().then(async () => {
 
   try {
     await database.initDatabase(appDataPath);
-    console.log('SQLite veritabanÃƒâ€Ã‚Â± baÃƒâ€¦Ã…Â¸arÃƒâ€Ã‚Â±yla baÃƒâ€Ã…Â¸landÃƒâ€Ã‚Â±.');
+    console.log('SQLite veritabani basariyla baglandi.');
   } catch (err) {
-    console.error('VeritabanÃƒâ€Ã‚Â± baÃƒâ€¦Ã…Â¸latÃƒâ€Ã‚Â±lamadÃƒâ€Ã‚Â±:', err.message);
+    console.error('Veritabani baslatilamadi:', err.message);
   }
 
   createWindow();

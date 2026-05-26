@@ -197,7 +197,7 @@ function App() {
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="logo-icon">
-            <img src={leafLogo} alt="Çetele Logo" style={{ width: 24, height: 24, display: 'block' }} />
+            <img src={leafLogo} alt="Çetele Logo" style={{ width: 38, height: 38, display: 'block' }} />
           </div>
           <div className="logo-text">
             <span>Çetele</span>
