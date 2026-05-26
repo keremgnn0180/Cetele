@@ -1,14 +1,14 @@
 {
   "name": "cetele",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Modern ve sade masaüstü Çetele uygulaması",
   "main": "main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"electron .\"",
     "vite-build": "vite build",
     "build": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder",
-    "installer": "node -e \"try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --win nsis",
-    "installer:portable": "node -e \"try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --win portable",
+    "installer": "node -e \"try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --win nsis --publish never",
+    "installer:portable": "node -e \"try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --win portable --publish never",
     "package": "electron-builder --dir",
     "preview": "vite preview",
     "start": "electron ."
@@ -62,7 +62,8 @@
     "icon": "assets/icon.ico",
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "signAndEditExecutable": false
     },
     "publish": [
       {
@@ -82,7 +83,7 @@
       "installerIcon": "assets/icon.ico",
       "uninstallerIcon": "assets/icon.ico",
       "installerHeaderIcon": "assets/icon.ico",
-      "artifactName": "Çetele Setup ${version}.exe"
+      "artifactName": "cetele-setup-${version}.exe"
     }
   }
 }

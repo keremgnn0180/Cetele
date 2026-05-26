@@ -47,8 +47,8 @@ npm run installer:portable
 - `better-sqlite3` derleme sorunu:  
   Uygulama fallback olarak `sql.js` kullanır, yine de Node sürümünüzü güncellemeniz önerilir.
 
-- İmza (code signing) yok uyarısı:  
-  Geliştirme ortamında normaldir. Üretimde sertifika ile imzalama önerilir.
+- SmartScreen "tanınmayan uygulama" uyarısı:  
+  İmzalanmamış EXE dosyalarında beklenen davranıştır. Kurumsal dağıtımda EV/OV Code Signing sertifikası ile imzalama yapılmalıdır.
 
 - Büyük chunk uyarısı:  
   Çalışmayı engellemez, optimizasyon amaçlıdır.
