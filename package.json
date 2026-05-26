@@ -1,6 +1,6 @@
 {
   "name": "cetele",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Modern ve sade masaüstü Çetele uygulaması",
   "main": "main.js",
   "scripts": {
@@ -46,7 +46,7 @@
   "license": "ISC",
   "build": {
     "appId": "com.cetele.app",
-    "productName": "Çetele",
+    "productName": "Cetele",
     "executableName": "cetele",
     "directories": {
       "output": "release"
@@ -77,7 +77,7 @@
       "perMachine": true,
       "allowElevation": true,
       "deleteAppDataOnUninstall": false,
-      "shortcutName": "Çetele",
+      "shortcutName": "Cetele",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "installerIcon": "assets/icon.ico",
