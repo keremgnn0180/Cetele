@@ -1,6 +1,6 @@
 {
   "name": "cetele",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Modern ve sade masaüstü Çetele uygulaması",
   "main": "main.js",
   "scripts": {
@@ -68,8 +68,7 @@
     "icon": "assets/icon.ico",
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico",
-      "signAndEditExecutable": false
+      "icon": "assets/icon.ico"
     },
     "publish": [
       {
