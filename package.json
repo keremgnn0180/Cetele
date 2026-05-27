@@ -1,6 +1,6 @@
 {
   "name": "cetele",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Modern ve sade masaüstü Çetele uygulaması",
   "main": "main.js",
   "scripts": {
@@ -83,6 +83,7 @@
       "installerIcon": "assets/icon.ico",
       "uninstallerIcon": "assets/icon.ico",
       "installerHeaderIcon": "assets/icon.ico",
+      "include": "build/installer.nsh",
       "artifactName": "cetele-setup-${version}.exe"
     }
   }
