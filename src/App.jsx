@@ -23,6 +23,7 @@ import Raporlar from './components/Raporlar';
 import Ayarlar from './components/Ayarlar';
 import SplashScreen from './components/SplashScreen';
 import leafLogo from './assets/leaf-logo.svg';
+import appIconPng from './assets/app-icon.png';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -197,7 +198,15 @@ function App() {
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="logo-icon">
-            <img src={leafLogo} alt="Çetele Logo" style={{ width: 38, height: 38, display: 'block' }} />
+            <img
+              src={leafLogo}
+              alt="Çetele Logo"
+              style={{ width: 38, height: 38, display: 'block' }}
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = appIconPng;
+              }}
+            />
           </div>
           <div className="logo-text">
             <span>Çetele</span>
