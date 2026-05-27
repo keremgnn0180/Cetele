@@ -1,6 +1,6 @@
 {
   "name": "cetele",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Modern ve sade masaüstü Çetele uygulaması",
   "main": "main.js",
   "scripts": {
@@ -58,6 +58,12 @@
       "database.js",
       "package.json",
       "assets/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "assets/icon.ico",
+        "to": "assets/icon.ico"
+      }
     ],
     "icon": "assets/icon.ico",
     "win": {
