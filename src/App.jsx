@@ -31,10 +31,31 @@ function App() {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [updatePopup, setUpdatePopup] = useState({ open: false, version: '', status: '' });
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2200);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const unsubs = [
+      window.api.onUpdateAvailable((payload) => {
+        setUpdatePopup({
+          open: true,
+          version: payload?.version || '',
+          status: 'Yeni güncelleme bulundu.'
+        });
+      }),
+      window.api.onUpdateDownloaded((payload) => {
+        setUpdatePopup({
+          open: true,
+          version: payload?.version || '',
+          status: 'Güncelleme indirildi ve kuruluma hazır.'
+        });
+      })
+    ];
+    return () => unsubs.forEach((fn) => fn && fn());
   }, []);
 
   const menuItems = [
@@ -278,6 +299,17 @@ function App() {
         </header>
 
         <div className="content-body">
+          {activeTab === 'dashboard' && updatePopup.open && (
+            <div className="update-popup-card">
+              <h3>Güncelleme Mevcut</h3>
+              <p>{updatePopup.status}</p>
+              {updatePopup.version && <p>Sürüm: <strong>{updatePopup.version}</strong></p>}
+              <div className="update-popup-actions">
+                <button className="btn btn-primary" onClick={() => setActiveTab('ayarlar')}>Ayarlara Git</button>
+                <button className="btn btn-secondary" onClick={() => setUpdatePopup((prev) => ({ ...prev, open: false }))}>Kapat</button>
+              </div>
+            </div>
+          )}
           {searchText.trim() && (
             <div className="search-results-card">
               <h3>Arama Sonuçları</h3>

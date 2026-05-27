@@ -1,6 +1,7 @@
 import React from 'react';
 import './SplashScreen.css';
 import leafLogo from '../assets/leaf-logo.svg';
+import appIconPng from '../assets/app-icon.png';
 
 function SplashScreen() {
   return (
@@ -10,7 +11,15 @@ function SplashScreen() {
 
       <div className="splash-content">
         <div className="splash-logo-wrap">
-          <img src={leafLogo} alt="Çetele Logo" className="splash-logo" />
+          <img
+            src={leafLogo}
+            alt="Çetele Logo"
+            className="splash-logo"
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = appIconPng;
+            }}
+          />
         </div>
         <h1 className="splash-title">Çetele</h1>
         <p className="splash-subtitle">Tarım Takip ve Yönetim Sistemi</p>

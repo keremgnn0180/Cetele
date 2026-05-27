@@ -1,4 +1,4 @@
-// main.js - corrected
+﻿// main.js - corrected
 const { app, BrowserWindow, ipcMain, dialog, Notification } = require('electron');
 const path = require('path');
 const log = require('electron-log');
@@ -7,10 +7,10 @@ let autoUpdater = null;
 try {
   autoUpdater = require('electron-updater').autoUpdater;
 } catch (err) {
-  console.log('Auto updater yÃƒÂ¼klenemedi:', err.message);
+  console.log('Auto updater yuklenemedi:', err.message);
 }
 app.setName('Cetele');
-app.setPath('userData', path.join(app.getPath('appData'), 'Cetele'));
+app.setPath('userData', path.join(app.getPath('appData'), 'Çetele'));
 app.setAppUserModelId('com.cetele.app');
 const fs = require('fs');
 const database = require('./database.js');
@@ -174,8 +174,38 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   const appDataPath = isDev ? __dirname : app.getPath('userData');
+  const currentDbPath = path.join(appDataPath, 'cetele.db');
+  const legacyCandidates = ['Cetele', '?etele', 'Çetele']
+    .map((name) => path.join(app.getPath('appData'), name))
+    .filter((p, i, arr) => arr.indexOf(p) === i);
 
   try {
+    if (!isDev) {
+      fs.mkdirSync(appDataPath, { recursive: true });
+      const hasCurrentDb = fs.existsSync(currentDbPath);
+      const currentDbSize = hasCurrentDb ? fs.statSync(currentDbPath).size : 0;
+
+      for (const legacyPath of legacyCandidates) {
+        if (legacyPath === appDataPath) continue;
+
+        const legacyDbPath = path.join(legacyPath, 'cetele.db');
+        if (fs.existsSync(legacyDbPath)) {
+          const legacyDbSize = fs.statSync(legacyDbPath).size;
+          const shouldRecoverDb = !hasCurrentDb || (currentDbSize < 32768 && legacyDbSize > currentDbSize);
+          if (shouldRecoverDb) {
+            fs.copyFileSync(legacyDbPath, currentDbPath);
+          }
+        }
+
+        const legacyBackups = path.join(legacyPath, 'backups');
+        const currentBackups = path.join(appDataPath, 'backups');
+        if (fs.existsSync(legacyBackups) && !fs.existsSync(currentBackups)) {
+          fs.cpSync(legacyBackups, currentBackups, { recursive: true });
+        }
+      }
+      console.log('Legacy profile recovery scan completed.');
+    }
+
     await database.initDatabase(appDataPath);
     console.log('SQLite veritabani basariyla baglandi.');
   } catch (err) {
@@ -200,7 +230,7 @@ app.on('window-all-closed', () => {
 });
 
 // ===================================================
-// SECURE IPC HANDLERS ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ unchanged (preserved from original file)
+// SECURE IPC HANDLERS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ unchanged (preserved from original file)
 // ===================================================
 
 // 1. TARLALAR
@@ -232,7 +262,7 @@ ipcMain.handle('tarlalar:remove', async (event, id) => {
   }
 });
 
-// 2. ÃƒÆ’Ã…â€œRÃƒÆ’Ã…â€œNLER
+// 2. ÃƒÆ’Ã†â€™Ãƒâ€¦Ã¢â‚¬Å“RÃƒÆ’Ã†â€™Ãƒâ€¦Ã¢â‚¬Å“NLER
 ipcMain.handle('urunler:get-all', async () => {
   try {
     return database.query('SELECT * FROM urunler ORDER BY id DESC');
@@ -269,7 +299,7 @@ ipcMain.handle('urunler:remove', async (event, id) => {
   }
 });
 
-// 3. EKÃƒâ€Ã‚Â°MLER
+// 3. EKÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â°MLER
 ipcMain.handle('ekimler:get-all', async () => {
   try {
     const sql = `
@@ -443,10 +473,10 @@ ipcMain.handle('hasatlar:remove', async (event, id) => {
   }
 });
 
-// 6. RAPORLAR & ÃƒÆ’Ã¢â‚¬â€œZET ANALÃƒâ€Ã‚Â°Z
+// 6. RAPORLAR & ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ZET ANALÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â°Z
 ipcMain.handle('raporlar:get-summary', async () => {
   try {
-    // Toplam sayÃƒâ€Ã‚Â± ve dÃƒÆ’Ã‚Â¶nÃƒÆ’Ã‚Â¼m
+    // Toplam sayÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â± ve dÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¶nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼m
     const tarlalarRes = database.query('SELECT COUNT(*) AS count, SUM(donum) AS totalDonum FROM tarlalar');
     const totalFields = tarlalarRes[0]?.count || 0;
     const totalArea = tarlalarRes[0]?.totalDonum || 0;
@@ -458,9 +488,9 @@ ipcMain.handle('raporlar:get-summary', async () => {
     const totalRevenue = hasatlarRes[0]?.total || 0;
     // Net Kar
     const netProfit = totalRevenue - totalExpenses;
-    // Kategoriye GÃƒÆ’Ã‚Â¶re Masraf DaÃƒâ€Ã…Â¸Ãƒâ€Ã‚Â±lÃƒâ€Ã‚Â±mÃƒâ€Ã‚Â±
+    // Kategoriye GÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¶re Masraf DaÃƒÆ’Ã¢â‚¬ÂÃƒâ€¦Ã‚Â¸ÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±lÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±mÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±
     const catExpenses = database.query('SELECT kategori, SUM(tutar) AS total FROM masraflar GROUP BY kategori');
-    // AylÃƒâ€Ã‚Â±k Masraf Trendi (Son 12 Ay)
+    // AylÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±k Masraf Trendi (Son 12 Ay)
     const monthlyExpenses = database.query(`
       SELECT strftime('%Y-%m', tarih) AS ay, SUM(tutar) AS total 
       FROM masraflar 
@@ -468,7 +498,7 @@ ipcMain.handle('raporlar:get-summary', async () => {
       ORDER BY ay ASC 
       LIMIT 12
     `);
-    // AylÃƒâ€Ã‚Â±k Gelir Trendi (Son 12 Ay)
+    // AylÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±k Gelir Trendi (Son 12 Ay)
     const monthlyRevenue = database.query(`
       SELECT strftime('%Y-%m', tarih) AS ay, SUM(gelir) AS total 
       FROM hasatlar 
@@ -500,7 +530,7 @@ ipcMain.handle('raporlar:get-summary', async () => {
     const recentActivities = [...lastPlantings, ...lastExpenses, ...lastHarvests]
       .sort((a, b) => new Date(b.tarih) - new Date(a.tarih))
       .slice(0, 8);
-    // Tarla PerformanslarÃƒâ€Ã‚Â±
+    // Tarla PerformanslarÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±
     const tarlaExpenses = database.query('SELECT tarla_id, SUM(tutar) AS total FROM masraflar GROUP BY tarla_id');
     const tarlaRevenue = database.query('SELECT tarla_id, SUM(gelir) AS total FROM hasatlar GROUP BY tarla_id');
     const allTarlalar = database.query('SELECT id, isim, donum FROM tarlalar');
@@ -533,11 +563,11 @@ ipcMain.handle('raporlar:get-summary', async () => {
   }
 });
 
-// 7. YEDEKLER & DOSYA Ãƒâ€Ã‚Â°Ãƒâ€¦Ã‚ÂLEMLERÃƒâ€Ã‚Â°
+// 7. YEDEKLER & DOSYA ÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚ÂLEMLERÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â°
 ipcMain.handle('backup:export', async () => {
-  if (!mainWindow) return { success: false, error: 'Pencere bulunamadÃƒâ€Ã‚Â±' };
+  if (!mainWindow) return { success: false, error: 'Pencere bulunamadÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±' };
   const { filePath } = await dialog.showSaveDialog(mainWindow, {
-    title: 'Ãƒâ€¡etele',
+    title: 'ÃƒÆ’Ã¢â‚¬Â¡etele',
     defaultPath: path.join(app.getPath('downloads'), `tarla-masraf-manuel-${new Date().toISOString().split('T')[0]}.db`),
     filters: [{ name: 'SQLite Database', extensions: ['db', 'sqlite'] }],
   });
@@ -551,9 +581,9 @@ ipcMain.handle('backup:export', async () => {
 });
 
 ipcMain.handle('backup:import', async () => {
-  if (!mainWindow) return { success: false, error: 'Pencere bulunamadÃƒâ€Ã‚Â±' };
+  if (!mainWindow) return { success: false, error: 'Pencere bulunamadÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±' };
   const { filePaths } = await dialog.showOpenDialog(mainWindow, {
-    title: 'Ãƒâ€¡etele',
+    title: 'ÃƒÆ’Ã¢â‚¬Â¡etele',
     filters: [{ name: 'SQLite Database', extensions: ['db', 'sqlite'] }],
     properties: ['openFile'],
   });
@@ -561,11 +591,11 @@ ipcMain.handle('backup:import', async () => {
   const selectedFile = filePaths[0];
   try {
     await database.importBackup(selectedFile);
-    dialog.showMessageBoxSync(mainWindow, { type: 'info', title: 'Ãƒâ€¡etele', message: 'VeritabanÃƒâ€Ã‚Â± yedeÃƒâ€Ã…Â¸i baÃƒâ€¦Ã…Â¸arÃƒâ€Ã‚Â±yla geri yÃƒÆ’Ã‚Â¼klendi! Veriler yenilenecektir.' });
+    dialog.showMessageBoxSync(mainWindow, { type: 'info', title: 'ÃƒÆ’Ã¢â‚¬Â¡etele', message: 'VeritabanÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â± yedeÃƒÆ’Ã¢â‚¬ÂÃƒâ€¦Ã‚Â¸i baÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€¦Ã‚Â¸arÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±yla geri yÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼klendi! Veriler yenilenecektir.' });
     mainWindow.reload();
     return { success: true };
   } catch (err) {
-    dialog.showErrorBox('YÃƒÆ’Ã‚Â¼kleme HatasÃƒâ€Ã‚Â±', `Yedek yÃƒÆ’Ã‚Â¼klenirken hata oluÃƒâ€¦Ã…Â¸tu:\n${err.message}`);
+    dialog.showErrorBox('YÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼kleme HatasÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±', `Yedek yÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼klenirken hata oluÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€¦Ã‚Â¸tu:\n${err.message}`);
     return { success: false, error: err.message };
   }
 });
@@ -589,13 +619,13 @@ ipcMain.handle('backup:create-manual', async () => {
 });
 
 ipcMain.handle('backup:restore-from-path', async (event, filePath) => {
-  if (!mainWindow) return { success: false, error: 'Pencere bulunamadÃƒâ€Ã‚Â±' };
+  if (!mainWindow) return { success: false, error: 'Pencere bulunamadÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±' };
   try {
     await database.importBackup(filePath);
     mainWindow.reload();
     return { success: true };
   } catch (err) {
-    dialog.showErrorBox('Geri YÃƒÆ’Ã‚Â¼kleme HatasÃƒâ€Ã‚Â±', `SeÃƒÆ’Ã‚Â§ilen yedek yÃƒÆ’Ã‚Â¼klenirken hata oluÃƒâ€¦Ã…Â¸tu:\n${err.message}`);
+    dialog.showErrorBox('Geri YÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼kleme HatasÃƒÆ’Ã¢â‚¬ÂÃƒâ€šÃ‚Â±', `SeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ilen yedek yÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼klenirken hata oluÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€¦Ã‚Â¸tu:\n${err.message}`);
     return { success: false, error: err.message };
   }
 });
