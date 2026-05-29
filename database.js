@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
 let db = null;
@@ -7,7 +7,7 @@ let dbFilePath = '';
 let backupsDirPath = '';
 let saveWasmDatabase = () => {};
 
-// 1. Veritabanını Başlat (better-sqlite3 -> fallback: sql.js)
+// 1. VeritabanÄ±nÄ± BaÅŸlat (better-sqlite3 -> fallback: sql.js)
 async function initDatabase(appDataPath) {
   dbFilePath = path.join(appDataPath, 'cetele.db');
   backupsDirPath = path.join(appDataPath, 'backups');
@@ -19,16 +19,16 @@ async function initDatabase(appDataPath) {
   runAutoDailyBackup();
 
   try {
-    console.log("better-sqlite3 motoru yüklenmeye çalışılıyor...");
+    console.log("better-sqlite3 motoru yÃ¼klenmeye Ã§alÄ±ÅŸÄ±lÄ±yor...");
     const Database = require('better-sqlite3');
-    db = new Database(dbFilePath);
-    db.pragma('foreign_keys = ON');
     isWasm = false;
-    console.log("BAŞARILI: better-sqlite3 motoru aktif.");
+    db = new Database(dbFilePath);
+    applyPragmas();
+    console.log("BAÅARILI: better-sqlite3 motoru aktif.");
     createTables();
     migrateTables();
   } catch (err) {
-    console.warn("better-sqlite3 yüklenemedi. sql.js WASM motoruna geçiş yapılıyor...", err.message);
+    console.warn("better-sqlite3 yÃ¼klenemedi. sql.js WASM motoruna geÃ§iÅŸ yapÄ±lÄ±yor...", err.message);
     
     try {
       const initSqlJs = require('sql.js');
@@ -42,7 +42,6 @@ async function initDatabase(appDataPath) {
         db = new SQL.Database();
       }
       
-      db.run('PRAGMA foreign_keys = ON;');
       isWasm = true;
 
       saveWasmDatabase = () => {
@@ -52,16 +51,34 @@ async function initDatabase(appDataPath) {
       };
 
       console.log('Database engine:', isWasm ? 'sql.js fallback' : 'better-sqlite3');
+      applyPragmas();
       createTables();
       migrateTables();
       saveWasmDatabase(); 
     } catch (wasmErr) {
-      console.error("KRİTİK HATA: Hiçbir veritabanı motoru başlatılamadı!", wasmErr.message);
+      console.error("KRÄ°TÄ°K HATA: HiÃ§bir veritabanÄ± motoru baÅŸlatÄ±lamadÄ±!", wasmErr.message);
       throw wasmErr;
     }
   }
 
   return { dbFilePath, isWasm };
+}
+
+function applyPragmas() {
+  const pragmas = [
+    'foreign_keys = ON',
+    'busy_timeout = 5000',
+    'journal_mode = WAL'
+  ];
+
+  pragmas.forEach((pragma) => {
+    try {
+      if (isWasm) db.run(`PRAGMA ${pragma};`);
+      else db.pragma(pragma);
+    } catch (err) {
+      console.warn(`SQLite pragma skipped [${pragma}]:`, err.message);
+    }
+  });
 }
 
 function createTables() {
@@ -129,7 +146,37 @@ function createTables() {
   } else {
     tableQueries.forEach(q => db.exec(q));
   }
-  console.log("SQLite tabloları hazır.");
+  createIndexes();
+  ensureMigrationTable();
+  console.log("SQLite tablolarÄ± hazÄ±r.");
+}
+
+function createIndexes() {
+  const indexQueries = [
+    'CREATE INDEX IF NOT EXISTS idx_ekimler_tarih ON ekimler(tarih);',
+    'CREATE INDEX IF NOT EXISTS idx_masraflar_tarih ON masraflar(tarih);',
+    'CREATE INDEX IF NOT EXISTS idx_hasatlar_tarih ON hasatlar(tarih);',
+    'CREATE INDEX IF NOT EXISTS idx_ekimler_tarla ON ekimler(tarla_id);',
+    'CREATE INDEX IF NOT EXISTS idx_masraflar_tarla ON masraflar(tarla_id);',
+    'CREATE INDEX IF NOT EXISTS idx_hasatlar_tarla ON hasatlar(tarla_id);'
+  ];
+
+  indexQueries.forEach((sql) => {
+    if (isWasm) db.run(sql);
+    else db.exec(sql);
+  });
+}
+
+function ensureMigrationTable() {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      version INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      applied_at TEXT NOT NULL
+    );
+  `;
+  if (isWasm) db.run(sql);
+  else db.exec(sql);
 }
 
 function migrateTables() {
@@ -140,7 +187,7 @@ function migrateTables() {
       run("ALTER TABLE urunler ADD COLUMN tohum_markasi TEXT;");
       run("ALTER TABLE urunler ADD COLUMN tohum_cesidi TEXT;");
       run("ALTER TABLE urunler ADD COLUMN tohum_notu TEXT;");
-      console.log("urunler tablosuna tohum kolonları eklendi.");
+      console.log("urunler tablosuna tohum kolonlarÄ± eklendi.");
     }
     if (!colNames.includes('tohum_marka')) {
       run("ALTER TABLE urunler ADD COLUMN tohum_marka TEXT;");
@@ -149,7 +196,7 @@ function migrateTables() {
       run("ALTER TABLE urunler ADD COLUMN tohum_cesit TEXT;");
     }
   } catch (e) {
-    console.log("Migration hatası (göz ardı edilebilir):", e.message);
+    console.log("Migration hatasÄ± (gÃ¶z ardÄ± edilebilir):", e.message);
   }
 
   try {
@@ -167,7 +214,7 @@ function migrateTables() {
       run("ALTER TABLE masraflar ADD COLUMN birim TEXT;");
     }
   } catch (e) {
-    console.log("Masraflar migration hatası (göz ardı edilebilir):", e.message);
+    console.log("Masraflar migration hatasÄ± (gÃ¶z ardÄ± edilebilir):", e.message);
   }
 }
 
@@ -187,7 +234,7 @@ function query(sql, params = []) {
       return stmt.all(...params);
     }
   } catch (err) {
-    console.error(`Sorgu hatası [${sql}]:`, err.message);
+    console.error(`Sorgu hatasÄ± [${sql}]:`, err.message);
     throw err;
   }
 }
@@ -213,7 +260,7 @@ function run(sql, params = []) {
       };
     }
   } catch (err) {
-    console.error(`Yazma hatası [${sql}]:`, err.message);
+    console.error(`Yazma hatasÄ± [${sql}]:`, err.message);
     throw err;
   }
 }
@@ -234,14 +281,14 @@ function runAutoDailyBackup() {
       
       const backupPath = path.join(backupsDirPath, `cetele-${timeStr}.db`);
       fs.copyFileSync(dbFilePath, backupPath);
-      console.log('Günlük otomatik yedek başarıyla oluşturuldu:', backupPath);
+      console.log('GÃ¼nlÃ¼k otomatik yedek baÅŸarÄ±yla oluÅŸturuldu:', backupPath);
 
       cleanOlderBackups();
     } else {
-      console.log('Bugün için otomatik yedek zaten mevcut, yeni yedek alınmadı.');
+      console.log('BugÃ¼n iÃ§in otomatik yedek zaten mevcut, yeni yedek alÄ±nmadÄ±.');
     }
   } catch (err) {
-    console.error('Otomatik günlük yedekleme hatası:', err.message);
+    console.error('Otomatik gÃ¼nlÃ¼k yedekleme hatasÄ±:', err.message);
   }
 }
 
@@ -264,7 +311,7 @@ function cleanOlderBackups() {
       });
     }
   } catch (err) {
-    console.error('Eski yedekleri temizleme hatası:', err.message);
+    console.error('Eski yedekleri temizleme hatasÄ±:', err.message);
   }
 }
 
@@ -276,18 +323,21 @@ function exportBackup(destPath) {
     fs.copyFileSync(dbFilePath, destPath);
     return { success: true };
   } catch (err) {
-    console.error('Yedek dışa aktarma hatası:', err.message);
+    console.error('Yedek dÄ±ÅŸa aktarma hatasÄ±:', err.message);
     throw err;
   }
 }
 
 async function importBackup(srcPath) {
   try {
+    const tempPath = `${dbFilePath}.restore-tmp`;
     if (isWasm) {
       if (db) {
         db.close();
       }
-      fs.copyFileSync(srcPath, dbFilePath);
+      fs.copyFileSync(srcPath, tempPath);
+      fs.copyFileSync(tempPath, dbFilePath);
+      fs.rmSync(tempPath, { force: true });
       
       const initSqlJs = require('sql.js');
       const SQL = await initSqlJs();
@@ -304,16 +354,18 @@ async function importBackup(srcPath) {
       if (db) {
         db.close();
       }
-      fs.copyFileSync(srcPath, dbFilePath);
+      fs.copyFileSync(srcPath, tempPath);
+      fs.copyFileSync(tempPath, dbFilePath);
+      fs.rmSync(tempPath, { force: true });
       
       const Database = require('better-sqlite3');
       db = new Database(dbFilePath);
-      db.pragma('foreign_keys = ON');
+      applyPragmas();
     }
-    console.log("Yedek başarıyla içe aktarıldı ve veritabanı yeniden bağlandı.");
+    console.log("Yedek baÅŸarÄ±yla iÃ§e aktarÄ±ldÄ± ve veritabanÄ± yeniden baÄŸlandÄ±.");
     return { success: true };
   } catch (err) {
-    console.error('Yedek içe aktarma hatası:', err.message);
+    console.error('Yedek iÃ§e aktarma hatasÄ±:', err.message);
     throw err;
   }
 }
@@ -336,7 +388,7 @@ function getBackupsList() {
       .sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
       .slice(0, 10);
   } catch (err) {
-    console.error('Yedek listeleme hatası:', err.message);
+    console.error('Yedek listeleme hatasÄ±:', err.message);
     return [];
   }
 }
@@ -353,9 +405,40 @@ function createManualBackup() {
     cleanOlderBackups(); 
     return { success: true, fileName: `cetele-${timeStr}.db` };
   } catch (err) {
-    console.error('Manuel yedekleme hatası:', err.message);
+    console.error('Manuel yedekleme hatasÄ±:', err.message);
     throw err;
   }
+}
+
+function healthCheck() {
+  const rows = query('SELECT name FROM sqlite_master WHERE type = ? LIMIT 1', ['table']);
+  return {
+    ok: true,
+    message: rows.length >= 0 ? 'Database erişilebilir' : 'Database boş',
+    dbFilePath,
+    engine: isWasm ? 'sql.js' : 'better-sqlite3'
+  };
+}
+
+function migrationHealthCheck() {
+  const rows = query("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'schema_migrations'");
+  if (!rows.length) throw new Error('schema_migrations tablosu yok');
+  return { ok: true, message: 'Migration tablosu hazır' };
+}
+
+function backupHealthCheck() {
+  if (!backupsDirPath || !fs.existsSync(backupsDirPath)) {
+    throw new Error('Backup klasörü bulunamadı');
+  }
+  fs.accessSync(backupsDirPath, fs.constants.R_OK | fs.constants.W_OK);
+  return { ok: true, message: 'Backup klasörü yazılabilir' };
+}
+
+function integrityCheck() {
+  const result = query('PRAGMA integrity_check;');
+  const value = Object.values(result[0] || {})[0];
+  if (value !== 'ok') throw new Error(`SQLite integrity_check failed: ${value}`);
+  return { ok: true };
 }
 
 function closeDatabase() {
@@ -381,5 +464,10 @@ module.exports = {
   importBackup,
   getBackupsList,
   createManualBackup,
+  healthCheck,
+  migrationHealthCheck,
+  backupHealthCheck,
+  integrityCheck,
   closeDatabase
 };
+

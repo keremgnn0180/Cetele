@@ -1,5 +1,5 @@
 ﻿// main.js - corrected
-const { app, BrowserWindow, ipcMain, dialog, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Notification, shell } = require('electron');
 const path = require('path');
 const log = require('electron-log');
 let autoUpdater = null;
@@ -14,8 +14,11 @@ app.setPath('userData', path.join(app.getPath('appData'), 'Çetele'));
 app.setAppUserModelId('com.cetele.app');
 const fs = require('fs');
 const database = require('./database.js');
+const HealthCheckService = require('./src/main/services/HealthCheckService.js');
+const { validateExpensePayload } = require('./src/shared/schemas/expenseSchema.js');
 
 let mainWindow;
+let healthCheckService;
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 let lastUpdateCheckAt = null;
 let updateStatus = 'Hazir';
@@ -146,12 +149,58 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
     },
+  });
+
+  const csp = isDev
+    ? "default-src 'self' http://localhost:5173; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;"
+    : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;";
+
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [csp],
+        'X-Content-Type-Options': ['nosniff']
+      }
+    });
+  });
+
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    const allowedDevUrl = isDev && url.startsWith('http://localhost:5173');
+    const allowedFileUrl = !isDev && url.startsWith('file://');
+    if (!allowedDevUrl && !allowedFileUrl) event.preventDefault();
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    const allowedHosts = ['github.com'];
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === 'https:' && allowedHosts.includes(parsed.hostname)) {
+        shell.openExternal(url);
+      }
+    } catch (err) {
+      log.warn('Blocked invalid external URL:', url);
+    }
+    return { action: 'deny' };
   });
 
   // Log loading errors.
   mainWindow.webContents.on('did-fail-load', (_, errorCode, errorDescription) => {
     console.log('LOAD ERROR:', errorCode, errorDescription);
+    if (!isDev) {
+      mainWindow.loadFile(path.join(__dirname, 'dist', 'recovery.html'));
+    }
+  });
+
+  mainWindow.webContents.on('render-process-gone', (_, details) => {
+    log.error('Renderer process gone:', details);
+    if (!mainWindow.isDestroyed() && !isDev) {
+      mainWindow.loadFile(path.join(__dirname, 'dist', 'recovery.html'));
+    }
   });
 
   if (isDev) {
@@ -207,6 +256,11 @@ app.whenReady().then(async () => {
     }
 
     await database.initDatabase(appDataPath);
+    healthCheckService = new HealthCheckService({
+      database,
+      updateStateProvider: () => ({ status: updateStatus, lastCheck: lastUpdateCheckAt })
+    });
+    await database.integrityCheck();
     console.log('SQLite veritabani basariyla baglandi.');
   } catch (err) {
     console.error('Veritabani baslatilamadi:', err.message);
@@ -227,6 +281,10 @@ app.whenReady().then(async () => {
 // Quit when all windows are closed, except on macOS.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('before-quit', () => {
+  database.closeDatabase();
 });
 
 // ===================================================
@@ -360,23 +418,24 @@ ipcMain.handle('masraflar:get-all', async () => {
 
 ipcMain.handle('masraflar:add', async (event, data) => {
   try {
-    const miktar = parseFloat(data.miktar);
-    const birim_fiyat = parseFloat(data.birim_fiyat);
+    const payload = validateExpensePayload(data);
+    const miktar = payload.miktar;
+    const birim_fiyat = payload.birim_fiyat;
     const tutar = miktar * birim_fiyat;
     const sql = 'INSERT INTO masraflar (tarla_id, kategori, urun_adi, gubre_marka, gubre_turu, gubre_cesit, miktar, birim, birim_fiyat, tutar, tarih, aciklama) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     return database.run(sql, [
-      data.tarla_id ? parseInt(data.tarla_id) : null,
-      data.kategori,
-      data.urun_adi || '',
-      data.gubre_marka || null,
-      data.gubre_turu || null,
-      data.gubre_cesit || null,
+      payload.tarla_id ? parseInt(payload.tarla_id) : null,
+      payload.kategori,
+      payload.urun_adi || '',
+      payload.gubre_marka || null,
+      payload.gubre_turu || null,
+      payload.gubre_cesit || null,
       miktar,
-      data.birim,
+      payload.birim,
       birim_fiyat,
       tutar,
-      data.tarih,
-      data.aciklama || '',
+      payload.tarih,
+      payload.aciklama || '',
     ]);
   } catch (err) {
     console.error('masraflar:add error:', err);
@@ -386,8 +445,9 @@ ipcMain.handle('masraflar:add', async (event, data) => {
 
 ipcMain.handle('masraflar:update', async (event, id, data) => {
   try {
-    const miktar = parseFloat(data.miktar);
-    const birim_fiyat = parseFloat(data.birim_fiyat);
+    const payload = validateExpensePayload(data);
+    const miktar = payload.miktar;
+    const birim_fiyat = payload.birim_fiyat;
     const tutar = miktar * birim_fiyat;
     const sql = `
       UPDATE masraflar
@@ -396,18 +456,18 @@ ipcMain.handle('masraflar:update', async (event, id, data) => {
       WHERE id = ?
     `;
     return database.run(sql, [
-      data.tarla_id ? parseInt(data.tarla_id) : null,
-      data.kategori,
-      data.urun_adi || '',
-      data.gubre_marka || null,
-      data.gubre_turu || null,
-      data.gubre_cesit || null,
+      payload.tarla_id ? parseInt(payload.tarla_id) : null,
+      payload.kategori,
+      payload.urun_adi || '',
+      payload.gubre_marka || null,
+      payload.gubre_turu || null,
+      payload.gubre_cesit || null,
       miktar,
-      data.birim,
+      payload.birim,
       birim_fiyat,
       tutar,
-      data.tarih,
-      data.aciklama || '',
+      payload.tarih,
+      payload.aciklama || '',
       parseInt(id)
     ]);
   } catch (err) {
@@ -640,5 +700,19 @@ ipcMain.handle('updates:get-state', async () => {
     lastCheck: lastUpdateCheckAt,
     status: updateStatus,
   };
+});
+
+ipcMain.handle('health:check', async () => {
+  if (!healthCheckService) {
+    return {
+      ok: false,
+      checkedAt: new Date().toISOString(),
+      checks: {
+        Database: { ok: false, message: 'Database service hazır değil' },
+        IPC: { ok: true }
+      }
+    };
+  }
+  return healthCheckService.run();
 });
 

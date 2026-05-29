@@ -1,45 +1,46 @@
-﻿# Çetele
+# Çetele
 
-Çetele, tarım işletmeleri için geliştirilmiş modern bir masaüstü takip uygulamasıdır.
-Tarla, ürün, ekim, masraf ve hasat/satış kayıtlarını tek yerden yönetmeyi sağlar.
+Çetele, tarım işletmeleri için offline-first çalışan Windows masaüstü kayıt ve mali takip uygulamasıdır. Tarla, ürün, ekim, masraf, hasat, yedekleme ve raporlama süreçlerini tek ekranda yönetmeyi hedefler.
+
+## Neden Var?
+
+Küçük ve orta ölçekli tarım işletmelerinde masraf, ekim ve hasat kayıtları çoğu zaman defter, Excel veya dağınık notlarda tutulur. Çetele bu kayıtları yerel SQLite veritabanında saklar, hızlı raporlama sağlar ve internet bağlantısı olmadan çalışır.
 
 ## Özellikler
 
-- Tarla, ürün, ekim, masraf ve hasat kayıt yönetimi
-- Dashboard üzerinde özet göstergeler ve son kayıtlar
-- Gelişmiş filtreleme ve arama
-- Masraf kayıtlarında ekleme, silme ve düzenleme
-- SQLite tabanlı yerel veri saklama
-- Yedek alma / geri yükleme
-- Electron tabanlı Windows masaüstü uygulaması
-- NSIS installer (kurulum sihirbazı) üretimi
+- Tarla, ürün, ekim, masraf ve hasat kayıtları
+- Dashboard özetleri ve son işlemler
+- Masraf düzenleme, silme ve arama
+- Tarihe göre işlem arama
+- Yerel SQLite veri saklama
+- Manuel ve otomatik yedekleme
+- Recovery Mode ve başlangıç sağlık kontrolü
+- GitHub Releases üzerinden auto-update altyapısı
+- Windows NSIS installer
 
-## Teknoloji Yığını
+## Teknoloji
 
 - Electron
 - React + Vite
 - SQLite (`better-sqlite3`, fallback: `sql.js`)
-- Electron Builder
+- Zod schema validation
+- Zustand + TanStack Query altyapısı
+- Vitest + React Testing Library + Playwright hazırlığı
 
-## Proje Yapısı
-
-```text
-src/                 React arayüzü
-src/components/      Sayfa ve bileşenler
-main.js              Electron ana süreç + IPC
-preload.js           Güvenli API köprüsü
-database.js          SQLite işlemleri
-assets/              Uygulama ikonları ve görseller
-```
-
-## Kurulum (Geliştirme)
+## Geliştirme
 
 ```bash
 npm install
 npm run dev
 ```
 
-Bu komut Vite ve Electron'u birlikte başlatır.
+## Doğrulama
+
+```bash
+npm run typecheck
+npm test
+npm run build
+```
 
 ## Üretim Build
 
@@ -47,47 +48,15 @@ Bu komut Vite ve Electron'u birlikte başlatır.
 npm run build
 ```
 
-Build çıktıları:
+Build çıktıları `dist/` ve `release/` altında oluşur.
 
-- `dist/` -> frontend bundle
-- `release/` -> Windows paketleri ve setup
+## Mimari ve Güvenlik
 
-## Installer Üretimi
-
-Windows kurulum dosyası üretmek için:
-
-```bash
-npm run installer
-```
-
-Portable exe üretmek için:
-
-```bash
-npm run installer:portable
-```
-
-Detaylı dağıtım notları için:
-
-- [INSTALLER.md](./INSTALLER.md)
-
-## Uygulama Nasıl Çalışır?
-
-1. Electron, `main.js` ile uygulama penceresini açar.
-2. React arayüzü `src/` içinden yüklenir.
-3. Arayüz, `preload.js` üzerinden güvenli IPC çağrıları yapar.
-4. Veri işlemleri `database.js` ile SQLite üzerinde gerçekleşir.
-5. Tüm veriler yerelde tutulur.
-
-## Veri Güvenliği
-
-- Veriler varsayılan olarak cihazda yerel SQLite dosyasında tutulur.
-- Yedekleme araçları ile manuel dışa aktarma/içe aktarma yapılabilir.
-
-## Sürümleme ve Yayın
-
-`package.json` içindeki `build.publish` alanı GitHub release altyapısına göre ayarlanmıştır.
-Yayın sürecinde repo sahipliği ve kimlik doğrulama ayarlarının doğrulanması gerekir.
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
+- [SECURITY.md](./SECURITY.md)
+- [RELEASE.md](./RELEASE.md)
+- [CHANGELOG.md](./CHANGELOG.md)
 
 ## Lisans
 
-ISC
+ISC. Ticari dağıtım öncesi lisans modeli, code signing ve aktivasyon sistemi netleştirilmelidir.

@@ -7,6 +7,11 @@
     "dev": "concurrently \"vite\" \"electron .\"",
     "vite-build": "vite build",
     "build": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder",
+    "lint": "node -e \"console.log('TODO: ESLint pipeline placeholder')\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "installer": "node -e \"try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --win nsis --publish never",
     "installer:portable": "node -e \"try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --win portable --publish never",
     "package": "electron-builder --dir",
@@ -14,25 +19,34 @@
     "start": "electron ."
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.100.14",
     "electron-log": "^5.4.4",
     "electron-updater": "^6.3.9",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.15.0",
-    "sql.js": "^1.12.0"
+    "sql.js": "^1.12.0",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
   },
   "optionalDependencies": {
     "better-sqlite3": "^11.8.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^8.2.2",
     "electron": "34.0.2",
     "electron-builder": "24.13.3",
+    "jsdom": "^29.1.1",
     "png-to-ico": "^2.1.8",
     "sharp": "^0.34.5",
-    "vite": "^6.0.5"
+    "typescript": "^6.0.3",
+    "vite": "^6.0.5",
+    "vitest": "^4.1.7"
   },
   "keywords": [
     "tarla",
@@ -56,6 +70,8 @@
       "main.js",
       "preload.js",
       "database.js",
+      "src/main/**/*",
+      "src/shared/**/*",
       "package.json",
       "assets/**/*"
     ],
@@ -68,7 +84,8 @@
     "icon": "assets/icon.ico",
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "signAndEditExecutable": false
     },
     "publish": [
       {

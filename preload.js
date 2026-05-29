@@ -52,6 +52,10 @@ contextBridge.exposeInMainWorld('api', {
     restoreFromPath: (filePath) => ipcRenderer.invoke('backup:restore-from-path', filePath)
   },
 
+  health: {
+    check: () => ipcRenderer.invoke('health:check')
+  },
+
   checkUpdates: () => ipcRenderer.invoke('check-updates'),
   getUpdateState: () => ipcRenderer.invoke('updates:get-state'),
   onUpdateAvailable: (callback) => {
