@@ -5,6 +5,8 @@ node_modules/
 dist/
 release/
 build/
+test-results/
+playwright-report/
 
 # Local runtime data
 *.db

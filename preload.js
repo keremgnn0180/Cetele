@@ -1,86 +1,75 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-// React uygulamasına sunulan tamamen güvenli, sınırlandırılmış ve adlandırılmış IPC metodları
+async function invoke(channel, ...args) {
+  const response = await ipcRenderer.invoke(channel, ...args);
+  if (!response || typeof response !== 'object' || !('ok' in response)) {
+    return response;
+  }
+  if (!response.ok) {
+    throw new Error(response.error || 'İşlem başarısız oldu.');
+  }
+  return response.data;
+}
+
+function on(channel, callback) {
+  const listener = (_event, payload) => callback(payload);
+  ipcRenderer.on(channel, listener);
+  return () => ipcRenderer.removeListener(channel, listener);
+}
+
 contextBridge.exposeInMainWorld('api', {
-  // Tarla API'leri
   tarlalar: {
-    getAll: () => ipcRenderer.invoke('tarlalar:get-all'),
-    add: (data) => ipcRenderer.invoke('tarlalar:add', data),
-    remove: (id) => ipcRenderer.invoke('tarlalar:remove', id)
+    getAll: () => invoke('tarlalar:get-all'),
+    add: (data) => invoke('tarlalar:add', data),
+    remove: (id) => invoke('tarlalar:remove', id)
   },
-  
-  // Ürün API'leri
+
   urunler: {
-    getAll: () => ipcRenderer.invoke('urunler:get-all'),
-    add: (data) => ipcRenderer.invoke('urunler:add', data),
-    remove: (id) => ipcRenderer.invoke('urunler:remove', id)
+    getAll: () => invoke('urunler:get-all'),
+    add: (data) => invoke('urunler:add', data),
+    remove: (id) => invoke('urunler:remove', id)
   },
-  
-  // Ekim API'leri
+
   ekimler: {
-    getAll: () => ipcRenderer.invoke('ekimler:get-all'),
-    add: (data) => ipcRenderer.invoke('ekimler:add', data),
-    remove: (id) => ipcRenderer.invoke('ekimler:remove', id)
+    getAll: () => invoke('ekimler:get-all'),
+    add: (data) => invoke('ekimler:add', data),
+    remove: (id) => invoke('ekimler:remove', id)
   },
-  
-  // Masraf API'leri (Gübre, İlaç, Tohum, Yakıt, İşçilik vb.)
+
   masraflar: {
-    getAll: () => ipcRenderer.invoke('masraflar:get-all'),
-    add: (data) => ipcRenderer.invoke('masraflar:add', data),
-    update: (id, data) => ipcRenderer.invoke('masraflar:update', id, data),
-    remove: (id) => ipcRenderer.invoke('masraflar:remove', id)
+    getAll: () => invoke('masraflar:get-all'),
+    add: (data) => invoke('masraflar:add', data),
+    update: (id, data) => invoke('masraflar:update', id, data),
+    remove: (id) => invoke('masraflar:remove', id)
   },
-  
-  // Hasat ve Satış API'leri
+
   hasatlar: {
-    getAll: () => ipcRenderer.invoke('hasatlar:get-all'),
-    add: (data) => ipcRenderer.invoke('hasatlar:add', data),
-    remove: (id) => ipcRenderer.invoke('hasatlar:remove', id)
+    getAll: () => invoke('hasatlar:get-all'),
+    add: (data) => invoke('hasatlar:add', data),
+    remove: (id) => invoke('hasatlar:remove', id)
   },
 
-  // Raporlama ve Özet Analiz API'leri
   raporlar: {
-    getSummary: () => ipcRenderer.invoke('raporlar:get-summary')
+    getSummary: () => invoke('raporlar:get-summary')
   },
 
-  // Zaman Damgalı Yedekleme API'leri
   backup: {
-    export: () => ipcRenderer.invoke('backup:export'),
-    import: () => ipcRenderer.invoke('backup:import'),
-    getBackups: () => ipcRenderer.invoke('backup:get-list'),
-    createManual: () => ipcRenderer.invoke('backup:create-manual'),
-    restoreFromPath: (filePath) => ipcRenderer.invoke('backup:restore-from-path', filePath)
+    export: () => invoke('backup:export'),
+    import: () => invoke('backup:import'),
+    getBackups: () => invoke('backup:get-list'),
+    createManual: () => invoke('backup:create-manual'),
+    restoreFromPath: (filePath) => invoke('backup:restore-from-path', filePath)
   },
 
   health: {
-    check: () => ipcRenderer.invoke('health:check')
+    check: () => invoke('health:check')
   },
 
-  checkUpdates: () => ipcRenderer.invoke('check-updates'),
-  getUpdateState: () => ipcRenderer.invoke('updates:get-state'),
-  onUpdateAvailable: (callback) => {
-    const listener = (_, payload) => callback(payload);
-    ipcRenderer.on('update:available', listener);
-    return () => ipcRenderer.removeListener('update:available', listener);
-  },
-  onDownloadProgress: (callback) => {
-    const listener = (_, payload) => callback(payload);
-    ipcRenderer.on('update:download-progress', listener);
-    return () => ipcRenderer.removeListener('update:download-progress', listener);
-  },
-  onUpdateDownloaded: (callback) => {
-    const listener = (_, payload) => callback(payload);
-    ipcRenderer.on('update:downloaded', listener);
-    return () => ipcRenderer.removeListener('update:downloaded', listener);
-  },
-  onUpdateNotAvailable: (callback) => {
-    const listener = (_, payload) => callback(payload);
-    ipcRenderer.on('update:not-available', listener);
-    return () => ipcRenderer.removeListener('update:not-available', listener);
-  },
-  onUpdateError: (callback) => {
-    const listener = (_, payload) => callback(payload);
-    ipcRenderer.on('update:error', listener);
-    return () => ipcRenderer.removeListener('update:error', listener);
-  }
+  checkUpdates: () => invoke('check-updates'),
+  getUpdateState: () => invoke('updates:get-state'),
+  onUpdateAvailable: (callback) => on('update:available', callback),
+  onDownloadProgress: (callback) => on('update:download-progress', callback),
+  onUpdateDownloaded: (callback) => on('update:downloaded', callback),
+  onUpdateNotAvailable: (callback) => on('update:not-available', callback),
+  onUpdateError: (callback) => on('update:error', callback)
 });
