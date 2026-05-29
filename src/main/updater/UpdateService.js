@@ -14,6 +14,10 @@ class UpdateService {
       this.autoUpdater.logger = logger;
       this.autoUpdater.autoDownload = true;
       this.autoUpdater.autoInstallOnAppQuit = true;
+      this.autoUpdater.requestHeaders = {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache'
+      };
     } catch (err) {
       this.logger.warn('Auto updater yüklenemedi:', err.message);
     }
