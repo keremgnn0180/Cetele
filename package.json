@@ -1,12 +1,13 @@
 {
   "name": "cetele",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Modern ve sade masaüstü Çetele uygulaması",
   "main": "main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"electron .\"",
     "vite-build": "vite build",
     "build": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder",
+    "build:release": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder -c.win.signAndEditExecutable=true",
     "lint": "node -e \"console.log('TODO: ESLint pipeline placeholder')\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
