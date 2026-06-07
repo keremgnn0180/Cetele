@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Sprout, Search, Filter, Star } from 'lucide-react';
+import { Plus, Trash2, Sprout, Search, Filter, Star, Leaf, ChevronDown } from 'lucide-react';
 import DeleteConfirmModal from './DeleteConfirmModal';
 
 const PREDEFINED_PRODUCTS = {
@@ -12,7 +12,16 @@ const PREDEFINED_PRODUCTS = {
 };
 
 const PREDEFINED_BRANDS = [
-  "Limagrain", "Dekalb", "Pioneer", "Syngenta", "KWS", "Bayer", "May Tohum", "Agromar", "Corteva"
+  { name: "Pioneer", icon: Sprout },
+  { name: "Syngenta", icon: Sprout },
+  { name: "Dekalb", icon: Leaf },
+  { name: "May Tohum", icon: Leaf },
+  { name: "Progen", icon: Sprout },
+  { name: "Limagrain", icon: Leaf },
+  { name: "KWS", icon: Leaf },
+  { name: "Agromar", icon: Leaf },
+  { name: "Corteva", icon: Leaf },
+  { name: "Bayer", icon: Sprout }
 ];
 
 function Urunler() {
@@ -24,6 +33,7 @@ function Urunler() {
   const [filterCategory, setFilterCategory] = useState('');
   const [isManualEntry, setIsManualEntry] = useState(false);
   const [isManualBrand, setIsManualBrand] = useState(false);
+  const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
 
   // Silme onay modalı durumları
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -260,16 +270,55 @@ function Urunler() {
                       onChange={(e) => setForm({ ...form, tohum_markasi: e.target.value })}
                     />
                   ) : (
-                    <select 
-                      className="form-control"
-                      value={form.tohum_markasi}
-                      onChange={(e) => setForm({ ...form, tohum_markasi: e.target.value })}
-                    >
-                      <option value="">-- Marka Seçin --</option>
-                      {PREDEFINED_BRANDS.map(marka => (
-                        <option key={marka} value={marka}>{marka}</option>
-                      ))}
-                    </select>
+                    <div style={{ position: 'relative' }}>
+                      <button
+                        type="button"
+                        className="form-control"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', width: '100%', cursor: 'pointer', background: 'var(--white)' }}
+                        onClick={() => setBrandDropdownOpen(!brandDropdownOpen)}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {form.tohum_markasi ? (
+                            <>
+                              {(() => {
+                                const matched = PREDEFINED_BRANDS.find(b => b.name === form.tohum_markasi);
+                                const Icon = matched ? matched.icon : Sprout;
+                                return <Icon size={16} style={{ color: 'var(--primary-600)' }} />;
+                              })()}
+                              {form.tohum_markasi}
+                            </>
+                          ) : (
+                            '-- Marka Seçin --'
+                          )}
+                        </span>
+                        <ChevronDown size={16} style={{ color: 'var(--slate-400)' }} />
+                      </button>
+                      {brandDropdownOpen && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, background: 'var(--white)', border: '1px solid var(--slate-200)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', marginTop: '4px', maxHeight: '200px', overflowY: 'auto' }}>
+                          <button
+                            type="button"
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 12px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--slate-500)', borderBottom: '1px solid var(--slate-100)' }}
+                            onClick={() => { setForm({ ...form, tohum_markasi: '' }); setBrandDropdownOpen(false); }}
+                          >
+                            Temizle
+                          </button>
+                          {PREDEFINED_BRANDS.map(brand => {
+                            const Icon = brand.icon;
+                            return (
+                              <button
+                                key={brand.name}
+                                type="button"
+                                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 12px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--slate-700)' }}
+                                onClick={() => { setForm({ ...form, tohum_markasi: brand.name }); setBrandDropdownOpen(false); }}
+                              >
+                                <Icon size={16} style={{ color: 'var(--primary-500)' }} />
+                                <span>{brand.name}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 

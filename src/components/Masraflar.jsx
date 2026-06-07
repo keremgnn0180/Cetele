@@ -1,6 +1,30 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, DollarSign, Filter, X, Search, Pencil } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Trash2, DollarSign, Filter, X, Search, Pencil, Sprout, Leaf, Combine, ShieldCheck, FlaskConical, ChevronDown } from 'lucide-react';
 import DeleteConfirmModal from './DeleteConfirmModal';
+
+const BRAND_OPTIONS_MAP = {
+  Tohum: [
+    { name: 'Pioneer', icon: Sprout },
+    { name: 'Syngenta', icon: Sprout },
+    { name: 'Dekalb', icon: Leaf },
+    { name: 'May Tohum', icon: Leaf },
+    { name: 'Progen', icon: Sprout }
+  ],
+  'Gübre': [
+    { name: 'Toros Gübre', icon: Combine },
+    { name: 'İgsaş', icon: Combine },
+    { name: 'Gübretaş', icon: Combine },
+    { name: 'Bagfaş', icon: Combine },
+    { name: 'Hektaş', icon: Combine }
+  ],
+  'İlaç': [
+    { name: 'Bayer', icon: ShieldCheck },
+    { name: 'Syngenta', icon: ShieldCheck },
+    { name: 'BASF', icon: FlaskConical },
+    { name: 'Hektaş', icon: FlaskConical },
+    { name: 'Koruma Klor', icon: ShieldCheck }
+  ]
+};
 
 const DEFAULT_FERTILIZERS = {
   Yara: {
@@ -114,6 +138,7 @@ function Masraflar() {
   const [masrafToDelete, setMasrafToDelete] = useState(null);
 
   const [fertilizers, setFertilizers] = useState(DEFAULT_FERTILIZERS);
+  const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
 
   const [form, setForm] = useState({
     tarla_id: '',
@@ -153,7 +178,21 @@ function Masraflar() {
     ? ['Adet', 'Saat', 'Gün', 'Dönüm', 'Dekar', 'Hektar', 'Çuval', 'Paket']
     : defaultBirimler;
 
-  const brandOptions = useMemo(() => Object.keys(fertilizers), [fertilizers]);
+  const brandOptions = useMemo(() => {
+    if (form.kategori === 'Gübre') {
+      return Object.keys(fertilizers);
+    }
+    return (BRAND_OPTIONS_MAP[form.kategori] || []).map(b => b.name);
+  }, [fertilizers, form.kategori]);
+
+  const getBrandIcon = (kategori, brandName) => {
+    const list = BRAND_OPTIONS_MAP[kategori] || [];
+    const matched = list.find(b => b.name === brandName);
+    if (matched) return matched.icon;
+    if (kategori === 'Tohum') return Sprout;
+    if (kategori === 'İlaç') return ShieldCheck;
+    return Combine;
+  };
   const typeOptions = useMemo(() => {
     if (!form.gubre_marka || isManualBrand) return [];
     return Object.keys(fertilizers[form.gubre_marka] || {});
@@ -276,17 +315,21 @@ function Masraflar() {
       let fertilizerFields = { marka: null, tur: null, cesit: null };
       if (form.kategori === 'Gübre') {
         fertilizerFields = applyManualEntries();
+      } else if (['İlaç', 'Tohum'].includes(form.kategori)) {
+        fertilizerFields.marka = isManualBrand ? newBrand.trim() : form.gubre_marka.trim();
       }
 
-      const fertilizerName = form.kategori === 'Gübre'
-        ? [fertilizerFields.marka, fertilizerFields.tur, fertilizerFields.cesit].filter(Boolean).join(' - ').trim()
+      const fertilizerName = ['Gübre', 'İlaç', 'Tohum'].includes(form.kategori)
+        ? (form.kategori === 'Gübre'
+            ? [fertilizerFields.marka, fertilizerFields.tur, fertilizerFields.cesit].filter(Boolean).join(' - ').trim()
+            : [fertilizerFields.marka, form.urun_adi.trim()].filter(Boolean).join(' - ').trim())
         : form.urun_adi.trim();
 
       const payload = {
         tarla_id: form.tarla_id ? parseInt(form.tarla_id) : null,
         kategori: form.kategori,
         urun_adi: fertilizerName || null,
-        gubre_marka: form.kategori === 'Gübre' ? fertilizerFields.marka : null,
+        gubre_marka: ['Gübre', 'İlaç', 'Tohum'].includes(form.kategori) ? fertilizerFields.marka : null,
         gubre_turu: form.kategori === 'Gübre' ? fertilizerFields.tur : null,
         gubre_cesit: form.kategori === 'Gübre' ? fertilizerFields.cesit : null,
         miktar: miktarNum,
@@ -326,7 +369,9 @@ function Masraflar() {
       gubre_marka: masraf.gubre_marka || '',
       gubre_turu: masraf.gubre_turu || '',
       gubre_cesit: masraf.gubre_cesit || '',
-      urun_adi: masraf.kategori === 'Gübre' ? '' : (masraf.urun_adi || ''),
+      urun_adi: ['Gübre', 'İlaç', 'Tohum'].includes(masraf.kategori) && masraf.gubre_marka
+        ? (masraf.urun_adi || '').replace(masraf.gubre_marka + ' - ', '')
+        : (masraf.urun_adi || ''),
       miktar: masraf.miktar?.toString() || '',
       birim: masraf.birim || 'Adet',
       birim_fiyat: masraf.birim_fiyat?.toString() || '',
@@ -643,7 +688,7 @@ function Masraflar() {
                         ...form,
                         kategori: nextKategori,
                         urun_adi: '',
-                        gubre_marka: Object.keys(fertilizers)[0] || '',
+                        gubre_marka: '',
                         gubre_turu: '',
                         gubre_cesit: '',
                         birim: nextKategori === 'İşçilik' ? 'Dönüm' : 'Adet'
@@ -657,89 +702,145 @@ function Masraflar() {
                 </div>
               </div>
 
-              {form.kategori === 'Gübre' ? (
+              {['Gübre', 'İlaç', 'Tohum'].includes(form.kategori) ? (
                 <>
                   <div className="form-row" style={{ marginTop: '10px' }}>
                     <div className="form-group">
                       <label className="form-label">Marka</label>
-                      <select
-                        className="form-control"
-                        value={form.gubre_marka}
-                        onChange={(e) => setForm({ ...form, gubre_marka: e.target.value, gubre_turu: '', gubre_cesit: '' })}
-                      >
-                        <option value="">Marka seç</option>
-                        {brandOptions.map((brand) => (
-                          <option key={brand} value={brand}>{brand}</option>
-                        ))}
-                        <option value={NEW_BRAND_OPTION}>{NEW_BRAND_OPTION}</option>
-                      </select>
-                      {isManualBrand && (
+                      
+                      {isManualBrand ? (
                         <input
                           type="text"
                           className="form-control"
-                          style={{ marginTop: '8px' }}
                           placeholder="Marka"
                           value={newBrand}
                           onChange={(e) => setNewBrand(e.target.value)}
                           required
                         />
+                      ) : (
+                        <div style={{ position: 'relative' }}>
+                          <button
+                            type="button"
+                            className="form-control"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', width: '100%', cursor: 'pointer', background: 'var(--white)' }}
+                            onClick={() => setBrandDropdownOpen(!brandDropdownOpen)}
+                          >
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {form.gubre_marka ? (
+                                <>
+                                  {(() => {
+                                    const Icon = getBrandIcon(form.kategori, form.gubre_marka);
+                                    return <Icon size={16} style={{ color: 'var(--primary-600)' }} />;
+                                  })()}
+                                  {form.gubre_marka}
+                                </>
+                              ) : (
+                                'Marka seç'
+                              )}
+                            </span>
+                            <ChevronDown size={16} style={{ color: 'var(--slate-400)' }} />
+                          </button>
+                          {brandDropdownOpen && (
+                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, background: 'var(--white)', border: '1px solid var(--slate-200)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', marginTop: '4px', maxHeight: '200px', overflowY: 'auto' }}>
+                              {brandOptions.map(brand => {
+                                const Icon = getBrandIcon(form.kategori, brand);
+                                return (
+                                  <button
+                                    key={brand}
+                                    type="button"
+                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 12px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--slate-700)' }}
+                                    onClick={() => { setForm({ ...form, gubre_marka: brand, gubre_turu: '', gubre_cesit: '' }); setBrandDropdownOpen(false); }}
+                                  >
+                                    <Icon size={16} style={{ color: 'var(--primary-500)' }} />
+                                    <span>{brand}</span>
+                                  </button>
+                                );
+                              })}
+                              <button
+                                type="button"
+                                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 12px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--primary-600)', fontWeight: '600', borderTop: '1px solid var(--slate-100)' }}
+                                onClick={() => { setForm({ ...form, gubre_marka: NEW_BRAND_OPTION }); setBrandDropdownOpen(false); }}
+                              >
+                                {NEW_BRAND_OPTION}
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
 
-                    <div className="form-group">
-                      <label className="form-label">Tür</label>
+                    {form.kategori === 'Gübre' && (
+                      <div className="form-group">
+                        <label className="form-label">Tür</label>
+                        <select
+                          className="form-control"
+                          value={form.gubre_turu}
+                          onChange={(e) => setForm({ ...form, gubre_turu: e.target.value, gubre_cesit: '' })}
+                          disabled={!form.gubre_marka}
+                        >
+                          <option value="">Tür seç</option>
+                          {typeOptions.map((type) => (
+                            <option key={type} value={type}>{type}</option>
+                          ))}
+                          <option value={NEW_TYPE_OPTION}>{NEW_TYPE_OPTION}</option>
+                        </select>
+                        {isManualType && (
+                          <input
+                            type="text"
+                            className="form-control"
+                            style={{ marginTop: '8px' }}
+                            placeholder="Tür"
+                            value={newType}
+                            onChange={(e) => setNewType(e.target.value)}
+                            required
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {form.kategori === 'Gübre' && (
+                    <div className="form-group" style={{ marginTop: '10px' }}>
+                      <label className="form-label">Çeşit</label>
                       <select
                         className="form-control"
-                        value={form.gubre_turu}
-                        onChange={(e) => setForm({ ...form, gubre_turu: e.target.value, gubre_cesit: '' })}
-                        disabled={!form.gubre_marka}
+                        value={form.gubre_cesit}
+                        onChange={(e) => setForm({ ...form, gubre_cesit: e.target.value })}
+                        disabled={!form.gubre_turu}
                       >
-                        <option value="">Tür seç</option>
-                        {typeOptions.map((type) => (
-                          <option key={type} value={type}>{type}</option>
+                        <option value="">Çeşit seç</option>
+                        {varietyOptions.map((item) => (
+                          <option key={item} value={item}>{item}</option>
                         ))}
-                        <option value={NEW_TYPE_OPTION}>{NEW_TYPE_OPTION}</option>
+                        <option value={NEW_VARIETY_OPTION}>{NEW_VARIETY_OPTION}</option>
                       </select>
-                      {isManualType && (
+                      {isManualVariety && (
                         <input
                           type="text"
                           className="form-control"
                           style={{ marginTop: '8px' }}
-                          placeholder="Tür"
-                          value={newType}
-                          onChange={(e) => setNewType(e.target.value)}
+                          placeholder="Çeşit"
+                          value={newVariety}
+                          onChange={(e) => setNewVariety(e.target.value)}
                           required
                         />
                       )}
                     </div>
-                  </div>
+                  )}
 
-                  <div className="form-group" style={{ marginTop: '10px' }}>
-                    <label className="form-label">Çeşit</label>
-                    <select
-                      className="form-control"
-                      value={form.gubre_cesit}
-                      onChange={(e) => setForm({ ...form, gubre_cesit: e.target.value })}
-                      disabled={!form.gubre_turu}
-                    >
-                      <option value="">Çeşit seç</option>
-                      {varietyOptions.map((item) => (
-                        <option key={item} value={item}>{item}</option>
-                      ))}
-                      <option value={NEW_VARIETY_OPTION}>{NEW_VARIETY_OPTION}</option>
-                    </select>
-                    {isManualVariety && (
+                  {form.kategori !== 'Gübre' && (
+                    <div className="form-group" style={{ marginTop: '10px' }}>
+                      <label className="form-label">Detay (Çeşit, Model, Not vb.)</label>
                       <input
                         type="text"
                         className="form-control"
-                        style={{ marginTop: '8px' }}
-                        placeholder="Çeşit"
-                        value={newVariety}
-                        onChange={(e) => setNewVariety(e.target.value)}
-                        required
+                        placeholder="Örn: LG 59.50 veya Sıvı İlaç"
+                        value={form.urun_adi}
+                        onChange={(e) => setForm({ ...form, urun_adi: e.target.value })}
+                        maxLength={50}
                       />
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="form-group" style={{ marginTop: '10px' }}>

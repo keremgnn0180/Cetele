@@ -106,17 +106,56 @@ function Raporlar() {
         <meta charset="utf-8" />
         <title>Çetele Raporu</title>
         <style>
-          @page { size: A4; margin: 8mm; }
+          @page {
+            size: auto;
+            margin: 5mm;
+          }
           html, body { width: 100%; height: 100%; }
-          body { font-family: Segoe UI, Arial, sans-serif; margin: 0; color: #111827; font-size: 9.8px; line-height: 1.22; }
-          h1 { font-size: 15px; margin: 0 0 4px; }
-          h2 { font-size: 12px; margin: 8px 0 4px; }
-          h3 { font-size: 11px; margin: 7px 0 4px; }
-          p { margin: 0 0 3px; }
-          ul { margin: 0 0 4px; padding-left: 16px; line-height: 1.3; }
-          li { margin-bottom: 2px; }
-          hr { border: 0; border-top: 1px solid #d1d5db; margin: 6px 0; }
-          .note { margin-top: 4px; color: #374151; font-style: italic; }
+          body { font-family: Segoe UI, Arial, sans-serif; margin: 0; color: #111827; font-size: 9px; line-height: 1.15; }
+          h1 { font-size: 14px; margin: 0 0 4px; }
+          h2 { font-size: 11px; margin: 6px 0 2px; }
+          h3 { font-size: 10px; margin: 5px 0 2px; }
+          p { margin: 0 0 2px; }
+          ul { margin: 0 0 3px; padding-left: 12px; line-height: 1.25; }
+          li { margin-bottom: 1px; }
+          hr { border: 0; border-top: 1px solid #d1d5db; margin: 4px 0; }
+          .note { margin-top: 3px; color: #374151; font-style: italic; }
+          
+          @media print {
+            h1, .logo, .nav, .navigation, header, footer, .no-print {
+              display: none !important;
+            }
+            body {
+              font-size: 8px !important;
+              line-height: 1.15 !important;
+              padding: 0 !important;
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+            h2 {
+              font-size: 10px !important;
+              margin: 4px 0 2px !important;
+            }
+            h3 {
+              font-size: 9px !important;
+              margin: 3px 0 2px !important;
+            }
+            ul {
+              margin: 0 0 3px !important;
+              padding-left: 12px !important;
+            }
+            li {
+              margin-bottom: 1px !important;
+              padding: 2px 4px !important;
+            }
+            li[style] {
+              margin-bottom: 2px !important;
+              padding: 3px 5px !important;
+            }
+            hr {
+              margin: 4px 0 !important;
+            }
+          }
         </style>
       </head>
       <body>
@@ -168,7 +207,7 @@ function Raporlar() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
         <button className="btn btn-primary btn-large" onClick={handlePrint}>
           <Printer size={20} />
           <span>Raporu Yazdır / PDF Kaydet</span>

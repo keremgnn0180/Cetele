@@ -1,3 +1,17 @@
+function toCamel(data) {
+  if (Array.isArray(data)) {
+    return data.map(toCamel);
+  }
+  if (data !== null && typeof data === 'object') {
+    return Object.keys(data).reduce((acc, key) => {
+      const camelKey = key.replace(/_([a-z0-9])/g, (_, g) => g.toUpperCase());
+      acc[camelKey] = toCamel(data[key]);
+      return acc;
+    }, {});
+  }
+  return data;
+}
+
 function registerExpenseIpc(registry, { database, schemas }) {
   registry.handle('masraflar:get-all', () => {
     const sql = `
@@ -6,7 +20,7 @@ function registerExpenseIpc(registry, { database, schemas }) {
       LEFT JOIN tarlalar t ON m.tarla_id = t.id
       ORDER BY m.tarih DESC, m.id DESC
     `;
-    return database.query(sql);
+    return database.query(sql).then(toCamel);
   });
 
   registry.handle('masraflar:add', (_event, data) => {
