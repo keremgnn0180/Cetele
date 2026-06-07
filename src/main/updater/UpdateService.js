@@ -73,14 +73,14 @@ class UpdateService {
     if (!app.isPackaged) {
       this.status = 'Geliştirme modunda atlandı';
       this.send('update:not-available', { checkedAt: this.lastCheck, version: app.getVersion(), devMode: true });
-      return { skipped: true, reason: 'dev-mode' };
+      return { ok: true, skipped: true, reason: 'dev-mode' };
     }
 
     const result = source === 'startup'
       ? await this.autoUpdater.checkForUpdatesAndNotify()
       : await this.autoUpdater.checkForUpdates();
 
-    return { updateInfo: result?.updateInfo || null };
+    return { ok: true, updateInfo: result?.updateInfo || null };
   }
 
   getState() {
