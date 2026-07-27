@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from "react";
 import {
   LayoutDashboard,
   Map,
@@ -10,28 +10,32 @@ import {
   Settings,
   Database,
   Bell,
-  Search
-} from 'lucide-react';
+  Search,
+} from "lucide-react";
 
-import Dashboard from './components/Dashboard';
-import Tarlalar from './components/Tarlalar';
-import Urunler from './components/Urunler';
-import Ekim from './components/Ekim';
-import Masraflar from './components/Masraflar';
-import Hasat from './components/Hasat';
-import Raporlar from './components/Raporlar';
-import Ayarlar from './components/Ayarlar';
-import SplashScreen from './components/SplashScreen';
-import leafLogo from './assets/leaf-logo.svg';
-import appIconPng from './assets/app-icon.png';
+import Dashboard from "./components/Dashboard";
+import Tarlalar from "./components/Tarlalar";
+import Urunler from "./components/Urunler";
+import Ekim from "./components/Ekim";
+import Masraflar from "./components/Masraflar";
+import Hasat from "./components/Hasat";
+import Raporlar from "./components/Raporlar";
+import Ayarlar from "./components/Ayarlar";
+import SplashScreen from "./components/SplashScreen";
+import leafLogo from "./assets/leaf-logo.svg";
+import appIconPng from "./assets/app-icon.png";
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [showSplash, setShowSplash] = useState(true);
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [updatePopup, setUpdatePopup] = useState({ open: false, version: '', status: '' });
+  const [updatePopup, setUpdatePopup] = useState({
+    open: false,
+    version: "",
+    status: "",
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2200);
@@ -43,71 +47,72 @@ function App() {
       window.api.onUpdateAvailable((payload) => {
         setUpdatePopup({
           open: true,
-          version: payload?.version || '',
-          status: 'Yeni güncelleme bulundu.'
+          version: payload?.version || "",
+          status: "Yeni güncelleme bulundu.",
         });
       }),
       window.api.onUpdateDownloaded((payload) => {
         setUpdatePopup({
           open: true,
-          version: payload?.version || '',
-          status: 'Güncelleme indirildi ve kuruluma hazır.'
+          version: payload?.version || "",
+          status: "Güncelleme indirildi ve kuruluma hazır.",
         });
-      })
+      }),
     ];
     return () => unsubs.forEach((fn) => fn && fn());
   }, []);
 
   const menuItems = [
-    { id: 'dashboard', name: 'Ana Ekran', icon: LayoutDashboard },
-    { id: 'tarlalar', name: 'Tarlalar', icon: Map },
-    { id: 'urunler', name: 'Ürünler', icon: Sprout },
-    { id: 'ekim', name: 'Ekim Kayıtları', icon: CalendarDays },
-    { id: 'masraflar', name: 'Masraflar', icon: DollarSign },
-    { id: 'hasat', name: 'Hasat & Satış', icon: TrendingUp },
-    { id: 'raporlar', name: 'Raporlar', icon: BarChart3 },
-    { id: 'ayarlar', name: 'Yedekleme & Ayarlar', icon: Settings }
+    { id: "dashboard", name: "Ana Ekran", icon: LayoutDashboard },
+    { id: "tarlalar", name: "Tarlalar", icon: Map },
+    { id: "urunler", name: "Ürünler", icon: Sprout },
+    { id: "ekim", name: "Ekim Kayıtları", icon: CalendarDays },
+    { id: "masraflar", name: "Masraflar", icon: DollarSign },
+    { id: "hasat", name: "Hasat & Satış", icon: TrendingUp },
+    { id: "raporlar", name: "Raporlar", icon: BarChart3 },
+    { id: "ayarlar", name: "Yedekleme & Ayarlar", icon: Settings },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard':
+      case "dashboard":
         return <Dashboard setActiveTab={setActiveTab} />;
-      case 'tarlalar':
+      case "tarlalar":
         return <Tarlalar />;
-      case 'urunler':
+      case "urunler":
         return <Urunler />;
-      case 'ekim':
+      case "ekim":
         return <Ekim />;
-      case 'masraflar':
+      case "masraflar":
         return <Masraflar />;
-      case 'hasat':
+      case "hasat":
         return <Hasat />;
-      case 'raporlar':
+      case "raporlar":
         return <Raporlar />;
-      case 'ayarlar':
+      case "ayarlar":
         return <Ayarlar />;
       default:
         return <Dashboard setActiveTab={setActiveTab} />;
     }
   };
 
-  const activePageName = menuItems.find((item) => item.id === activeTab)?.name || 'Ana Ekran';
+  const activePageName =
+    menuItems.find((item) => item.id === activeTab)?.name || "Ana Ekran";
   const todayLabel = useMemo(
     () =>
-      new Date().toLocaleDateString('tr-TR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
+      new Date().toLocaleDateString("tr-TR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
       }),
-    []
+    [],
   );
   const todayWeekday = useMemo(
     () =>
-      new Date().toLocaleDateString('tr-TR', {
-        weekday: 'long'
+      new Date().toLocaleDateString("tr-TR", {
+        weekday: "long",
       }),
-    []
+    [],
   );
 
   const parseSearchDate = (value) => {
@@ -119,20 +124,35 @@ function App() {
 
     const dotMatch = text.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
     if (dotMatch) {
-      const day = dotMatch[1].padStart(2, '0');
-      const month = dotMatch[2].padStart(2, '0');
+      const day = dotMatch[1].padStart(2, "0");
+      const month = dotMatch[2].padStart(2, "0");
       return `${dotMatch[3]}-${month}-${day}`;
     }
 
     const monthMap = {
-      ocak: '01', subat: '02', 'şubat': '02', mart: '03', nisan: '04', mayis: '05', mayıs: '05',
-      haziran: '06', temmuz: '07', agustos: '08', ağustos: '08', eylul: '09', eylül: '09',
-      ekim: '10', kasim: '11', kasım: '11', aralik: '12', aralık: '12'
+      ocak: "01",
+      subat: "02",
+      şubat: "02",
+      mart: "03",
+      nisan: "04",
+      mayis: "05",
+      mayıs: "05",
+      haziran: "06",
+      temmuz: "07",
+      agustos: "08",
+      ağustos: "08",
+      eylul: "09",
+      eylül: "09",
+      ekim: "10",
+      kasim: "11",
+      kasım: "11",
+      aralik: "12",
+      aralık: "12",
     };
 
     const longMatch = text.match(/^(\d{1,2})\s+([a-zçğıöşü]+)\s+(\d{4})$/i);
     if (longMatch) {
-      const day = longMatch[1].padStart(2, '0');
+      const day = longMatch[1].padStart(2, "0");
       const month = monthMap[longMatch[2]];
       if (month) return `${longMatch[3]}-${month}-${day}`;
     }
@@ -153,34 +173,39 @@ function App() {
         const [ekimler, masraflar, hasatlar] = await Promise.all([
           window.api.ekimler.getAll(),
           window.api.masraflar.getAll(),
-          window.api.hasatlar.getAll()
+          window.api.hasatlar.getAll(),
         ]);
 
         const activities = [
           ...ekimler.map((item) => ({
-            tip: 'Ekim',
+            tip: "Ekim",
             tarih: item.tarih,
-            detay: item.urun_isim || item.aciklama || 'Ekim Kaydı',
-            tarla: item.tarla_isim || '-',
-            miktar: `${item.miktar || 0} ${item.birim || ''}`.trim(),
-            aranabilir: `${item.urun_isim || ''} ${item.tarla_isim || ''} ${item.aciklama || ''}`.toLowerCase()
+            detay: item.urun_isim || item.aciklama || "Ekim Kaydı",
+            tarla: item.tarla_isim || "-",
+            miktar: `${item.miktar || 0} ${item.birim || ""}`.trim(),
+            aranabilir:
+              `${item.urun_isim || ""} ${item.tarla_isim || ""} ${item.aciklama || ""}`.toLowerCase(),
           })),
           ...masraflar.map((item) => ({
-            tip: 'Masraf',
+            tip: "Masraf",
             tarih: item.tarih,
-            detay: item.kategori ? `${item.kategori} - ${item.urun_adi || ''}` : (item.urun_adi || 'Masraf Kaydı'),
-            tarla: item.tarla_isim || 'Genel',
-            miktar: `${Number(item.tutar || 0).toLocaleString('tr-TR')} TL`,
-            aranabilir: `${item.kategori || ''} ${item.urun_adi || ''} ${item.tarla_isim || ''} ${item.aciklama || ''}`.toLowerCase()
+            detay: item.kategori
+              ? `${item.kategori} - ${item.urun_adi || ""}`
+              : item.urun_adi || "Masraf Kaydı",
+            tarla: item.tarla_isim || "Genel",
+            miktar: `${Number(item.tutar || 0).toLocaleString("tr-TR")} TL`,
+            aranabilir:
+              `${item.kategori || ""} ${item.urun_adi || ""} ${item.tarla_isim || ""} ${item.aciklama || ""}`.toLowerCase(),
           })),
           ...hasatlar.map((item) => ({
-            tip: 'Hasat',
+            tip: "Hasat",
             tarih: item.tarih,
-            detay: item.urun_isim || item.aciklama || 'Hasat Kaydı',
-            tarla: item.tarla_isim || '-',
-            miktar: `${Number(item.gelir || 0).toLocaleString('tr-TR')} TL`,
-            aranabilir: `${item.urun_isim || ''} ${item.tarla_isim || ''} ${item.aciklama || ''}`.toLowerCase()
-          }))
+            detay: item.urun_isim || item.aciklama || "Hasat Kaydı",
+            tarla: item.tarla_isim || "-",
+            miktar: `${Number(item.gelir || 0).toLocaleString("tr-TR")} TL`,
+            aranabilir:
+              `${item.urun_isim || ""} ${item.tarla_isim || ""} ${item.aciklama || ""}`.toLowerCase(),
+          })),
         ];
 
         const dateQuery = parseSearchDate(query);
@@ -188,18 +213,23 @@ function App() {
 
         const filtered = activities
           .filter((item) => {
-            const itemDate = String(item.tarih || '').slice(0, 10);
+            const itemDate = String(item.tarih || "").slice(0, 10);
             if (dateQuery) {
-              return itemDate === dateQuery || item.aranabilir.includes(lowerQuery);
+              return (
+                itemDate === dateQuery || item.aranabilir.includes(lowerQuery)
+              );
             }
-            return item.aranabilir.includes(lowerQuery) || itemDate.includes(lowerQuery);
+            return (
+              item.aranabilir.includes(lowerQuery) ||
+              itemDate.includes(lowerQuery)
+            );
           })
           .sort((a, b) => new Date(b.tarih) - new Date(a.tarih))
           .slice(0, 30);
 
         setSearchResults(filtered);
       } catch (error) {
-        console.error('Arama sırasında hata oluştu:', error);
+        console.error("Arama sırasında hata oluştu:", error);
         setSearchResults([]);
       } finally {
         setSearchLoading(false);
@@ -222,7 +252,7 @@ function App() {
             <img
               src={leafLogo}
               alt="Çetele Logo"
-              style={{ width: 38, height: 38, display: 'block' }}
+              style={{ width: 38, height: 38, display: "block" }}
               onError={(event) => {
                 event.currentTarget.onerror = null;
                 event.currentTarget.src = appIconPng;
@@ -242,8 +272,8 @@ function App() {
               <li key={item.id} className="menu-item">
                 <button
                   onClick={() => setActiveTab(item.id)}
-                  className={`menu-link ${activeTab === item.id ? 'active' : ''}`}
-                  style={{ width: '100%', textAlign: 'left' }}
+                  className={`menu-link ${activeTab === item.id ? "active" : ""}`}
+                  style={{ width: "100%", textAlign: "left" }}
                 >
                   <Icon size={18} />
                   <span>{item.name}</span>
@@ -282,11 +312,22 @@ function App() {
               />
             </div>
 
-            <button type="button" className="header-icon-btn" aria-label="Bildirimler" disabled title="Bildirimler yakında aktif olacak">
+            <button
+              type="button"
+              className="header-icon-btn"
+              aria-label="Bildirimler"
+              disabled
+              title="Bildirimler yakında aktif olacak"
+            >
               <Bell size={18} />
             </button>
 
-            <button type="button" className="header-icon-btn" aria-label="Ayarlar" onClick={() => setActiveTab('ayarlar')}>
+            <button
+              type="button"
+              className="header-icon-btn"
+              aria-label="Ayarlar"
+              onClick={() => setActiveTab("ayarlar")}
+            >
               <Settings size={18} />
             </button>
 
@@ -299,14 +340,30 @@ function App() {
         </header>
 
         <div className="content-body">
-          {activeTab === 'dashboard' && updatePopup.open && (
+          {activeTab === "dashboard" && updatePopup.open && (
             <div className="update-popup-card">
               <h3>Güncelleme Mevcut</h3>
               <p>{updatePopup.status}</p>
-              {updatePopup.version && <p>Sürüm: <strong>{updatePopup.version}</strong></p>}
+              {updatePopup.version && (
+                <p>
+                  Sürüm: <strong>{updatePopup.version}</strong>
+                </p>
+              )}
               <div className="update-popup-actions">
-                <button className="btn btn-primary" onClick={() => setActiveTab('ayarlar')}>Ayarlara Git</button>
-                <button className="btn btn-secondary" onClick={() => setUpdatePopup((prev) => ({ ...prev, open: false }))}>Kapat</button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setActiveTab("ayarlar")}
+                >
+                  Ayarlara Git
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() =>
+                    setUpdatePopup((prev) => ({ ...prev, open: false }))
+                  }
+                >
+                  Kapat
+                </button>
               </div>
             </div>
           )}
@@ -318,7 +375,9 @@ function App() {
               ) : (
                 <p className="search-results-meta">
                   {searchResults.length} kayıt bulundu
-                  {parseSearchDate(searchText) ? ` • Tarih: ${parseSearchDate(searchText)}` : ''}
+                  {parseSearchDate(searchText)
+                    ? ` • Tarih: ${parseSearchDate(searchText)}`
+                    : ""}
                 </p>
               )}
 
@@ -329,12 +388,16 @@ function App() {
               {!searchLoading && searchResults.length > 0 && (
                 <div className="search-results-list">
                   {searchResults.map((item, idx) => (
-                    <div key={`${item.tip}-${item.tarih}-${idx}`} className="search-item">
+                    <div
+                      key={`${item.tip}-${item.tarih}-${idx}`}
+                      className="search-item"
+                    >
                       <div>
                         <strong>{item.tip}</strong> • {item.detay}
                       </div>
                       <div className="search-item-sub">
-                        {new Date(item.tarih).toLocaleDateString('tr-TR')} • Tarla: {item.tarla} • {item.miktar}
+                        {new Date(item.tarih).toLocaleDateString("tr-TR")} •
+                        Tarla: {item.tarla} • {item.miktar}
                       </div>
                     </div>
                   ))}

@@ -1,5 +1,5 @@
 function registerHarvestIpc(registry, { database, schemas }) {
-  registry.handle('hasatlar:get-all', () => {
+  registry.handle("hasatlar:get-all", () => {
     const sql = `
       SELECT h.*, t.isim AS tarla_isim, u.isim AS urun_isim
       FROM hasatlar h
@@ -10,10 +10,11 @@ function registerHarvestIpc(registry, { database, schemas }) {
     return database.query(sql);
   });
 
-  registry.handle('hasatlar:add', (_event, data) => {
+  registry.handle("hasatlar:add", (_event, data) => {
     const payload = schemas.harvestSchema.parse(data);
     const gelir = payload.miktar * payload.birim_satis_fiyati;
-    const sql = 'INSERT INTO hasatlar (tarla_id, urun_id, miktar, birim, birim_satis_fiyati, gelir, tarih, aciklama) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    const sql =
+      "INSERT INTO hasatlar (tarla_id, urun_id, miktar, birim, birim_satis_fiyati, gelir, tarih, aciklama) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     return database.run(sql, [
       payload.tarla_id,
       payload.urun_id,
@@ -22,12 +23,14 @@ function registerHarvestIpc(registry, { database, schemas }) {
       payload.birim_satis_fiyati,
       gelir,
       payload.tarih,
-      payload.aciklama || ''
+      payload.aciklama || "",
     ]);
   });
 
-  registry.handle('hasatlar:remove', (_event, id) => {
-    return database.run('DELETE FROM hasatlar WHERE id = ?', [schemas.idSchema.parse(id)]);
+  registry.handle("hasatlar:remove", (_event, id) => {
+    return database.run("DELETE FROM hasatlar WHERE id = ?", [
+      schemas.idSchema.parse(id),
+    ]);
   });
 }
 

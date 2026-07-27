@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, MapPin, Layers } from 'lucide-react';
-import DeleteConfirmModal from './DeleteConfirmModal';
+import React, { useState, useEffect } from "react";
+import { Plus, Trash2, MapPin, Layers } from "lucide-react";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 
 function Tarlalar() {
   const [tarlalar, setTarlalar] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ isim: '', donum: '', konum: '' });
-  const [error, setError] = useState('');
-  
+  const [form, setForm] = useState({ isim: "", donum: "", konum: "" });
+  const [error, setError] = useState("");
+
   // Silme onay modalı durumları
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [tarlaToDelete, setTarlaToDelete] = useState(null);
@@ -18,7 +18,7 @@ function Tarlalar() {
       const data = await window.api.tarlalar.getAll();
       setTarlalar(data);
     } catch (err) {
-      console.error('Tarlalar yüklenirken hata oluştu:', err);
+      console.error("Tarlalar yüklenirken hata oluştu:", err);
     }
   };
 
@@ -29,16 +29,16 @@ function Tarlalar() {
   // Form kaydetme
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!form.isim || !form.donum) {
-      setError('Lütfen isim ve dönüm alanlarını doldurun.');
+      setError("Lütfen isim ve dönüm alanlarını doldurun.");
       return;
     }
 
     const donumNum = parseFloat(form.donum);
     if (isNaN(donumNum) || donumNum <= 0) {
-      setError('Dönüm pozitif bir sayı olmalıdır.');
+      setError("Dönüm pozitif bir sayı olmalıdır.");
       return;
     }
 
@@ -46,22 +46,22 @@ function Tarlalar() {
       await window.api.tarlalar.add({
         isim: form.isim,
         donum: donumNum,
-        konum: form.konum
+        konum: form.konum,
       });
-      
+
       // Dashboard önbelleğini geçersiz kıl
       if (window.dashboardCache) {
         window.dashboardCache.isDirty = true;
       }
-      
-      setForm({ isim: '', donum: '', konum: '' });
+
+      setForm({ isim: "", donum: "", konum: "" });
       setShowModal(false);
       fetchTarlalar();
     } catch (err) {
-      if (err.message.includes('UNIQUE')) {
-        setError('Bu isimde bir tarla zaten kayıtlı.');
+      if (err.message.includes("UNIQUE")) {
+        setError("Bu isimde bir tarla zaten kayıtlı.");
       } else {
-        setError('Tarla kaydedilirken bir hata oluştu: ' + err.message);
+        setError("Tarla kaydedilirken bir hata oluştu: " + err.message);
       }
     }
   };
@@ -75,19 +75,19 @@ function Tarlalar() {
   // Güvenli silme eylemi
   const handleConfirmDelete = async () => {
     if (!tarlaToDelete) return;
-    
+
     try {
       await window.api.tarlalar.remove(tarlaToDelete.id);
-      
+
       // Dashboard önbelleğini geçersiz kıl
       if (window.dashboardCache) {
         window.dashboardCache.isDirty = true;
       }
-      
+
       setTarlaToDelete(null);
       fetchTarlalar();
     } catch (err) {
-      alert('Tarla silinirken hata oluştu: ' + err.message);
+      alert("Tarla silinirken hata oluştu: " + err.message);
     }
   };
 
@@ -97,13 +97,26 @@ function Tarlalar() {
   return (
     <div>
       {/* Üst Bilgi ve Buton Paneli */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "24px",
+        }}
+      >
         <div>
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--slate-700)' }}>
-            Toplam Tarla Alanı: <span style={{ color: 'var(--primary-600)', fontWeight: '800' }}>{totalDonum.toLocaleString('tr-TR')} Dönüm</span>
+          <h2 style={{ fontSize: "1.25rem", color: "var(--slate-700)" }}>
+            Toplam Tarla Alanı:{" "}
+            <span style={{ color: "var(--primary-600)", fontWeight: "800" }}>
+              {totalDonum.toLocaleString("tr-TR")} Dönüm
+            </span>
           </h2>
         </div>
-        <button className="btn btn-primary btn-large" onClick={() => setShowModal(true)}>
+        <button
+          className="btn btn-primary btn-large"
+          onClick={() => setShowModal(true)}
+        >
           <Plus size={20} />
           <span>Yeni Tarla Ekle</span>
         </button>
@@ -114,32 +127,101 @@ function Tarlalar() {
         <div className="card empty-state">
           <Layers size={48} />
           <h3>Henüz kayıtlı tarla bulunamadı.</h3>
-          <p style={{ marginTop: '8px' }}>Uygulamayı kullanmaya başlamak için yukarıdaki butondan ilk tarlanızı ekleyin.</p>
+          <p style={{ marginTop: "8px" }}>
+            Uygulamayı kullanmaya başlamak için yukarıdaki butondan ilk
+            tarlanızı ekleyin.
+          </p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            gap: "24px",
+          }}
+        >
           {tarlalar.map((tarla) => (
-            <div key={tarla.id} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', position: 'relative' }}>
+            <div
+              key={tarla.id}
+              className="card"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                height: "100%",
+                position: "relative",
+              }}
+            >
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: '700', wordBreak: 'break-word', paddingRight: '32px' }}>{tarla.isim}</h3>
-                  <span className="badge badge-primary" style={{ fontSize: '0.9rem', padding: '6px 12px', flexShrink: 0 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "1.3rem",
+                      fontWeight: "700",
+                      wordBreak: "break-word",
+                      paddingRight: "32px",
+                    }}
+                  >
+                    {tarla.isim}
+                  </h3>
+                  <span
+                    className="badge badge-primary"
+                    style={{
+                      fontSize: "0.9rem",
+                      padding: "6px 12px",
+                      flexShrink: 0,
+                    }}
+                  >
                     {tarla.donum} Dönüm
                   </span>
                 </div>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', color: 'var(--slate-600)', fontSize: '0.92rem', marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <MapPin size={16} style={{ color: 'var(--primary-500)' }} />
-                    <span>{tarla.konum || 'Konum belirtilmedi'}</span>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                    color: "var(--slate-600)",
+                    fontSize: "0.92rem",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <MapPin size={16} style={{ color: "var(--primary-500)" }} />
+                    <span>{tarla.konum || "Konum belirtilmedi"}</span>
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--slate-100)', paddingTop: '16px', marginTop: 'auto' }}>
-                <button 
-                  className="btn btn-secondary" 
-                  style={{ color: 'var(--danger)', borderColor: 'rgba(220, 53, 69, 0.2)', padding: '8px 16px' }}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  borderTop: "1px solid var(--slate-100)",
+                  paddingTop: "16px",
+                  marginTop: "auto",
+                }}
+              >
+                <button
+                  className="btn btn-secondary"
+                  style={{
+                    color: "var(--danger)",
+                    borderColor: "rgba(220, 53, 69, 0.2)",
+                    padding: "8px 16px",
+                  }}
                   onClick={() => handleDeleteTrigger(tarla)}
                 >
                   <Trash2 size={16} />
@@ -155,13 +237,31 @@ function Tarlalar() {
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Layers style={{ color: 'var(--primary-600)' }} />
+            <h3
+              style={{
+                fontSize: "1.5rem",
+                marginBottom: "20px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <Layers style={{ color: "var(--primary-600)" }} />
               <span>Yeni Tarla Ekle</span>
             </h3>
 
             {error && (
-              <div className="badge badge-danger" style={{ width: '100%', borderRadius: 'var(--radius-sm)', padding: '12px', marginBottom: '16px', display: 'block', textAlign: 'center' }}>
+              <div
+                className="badge badge-danger"
+                style={{
+                  width: "100%",
+                  borderRadius: "var(--radius-sm)",
+                  padding: "12px",
+                  marginBottom: "16px",
+                  display: "block",
+                  textAlign: "center",
+                }}
+              >
                 {error}
               </div>
             )}
@@ -169,8 +269,8 @@ function Tarlalar() {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="form-label">Tarla Adı / Tanımı *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="form-control"
                   placeholder="Örn: Dere Boyu Tarlası, Evin Arkası"
                   value={form.isim}
@@ -182,8 +282,8 @@ function Tarlalar() {
 
               <div className="form-group">
                 <label className="form-label">Dönüm Büyüklüğü (Miktar) *</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   step="any"
                   className="form-control"
                   placeholder="Örn: 15.5"
@@ -195,8 +295,8 @@ function Tarlalar() {
 
               <div className="form-group">
                 <label className="form-label">Konum / Açıklama</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="form-control"
                   placeholder="Örn: Çatalca, Karacaköy Yolu veya Koordinatlar"
                   value={form.konum}
@@ -205,11 +305,27 @@ function Tarlalar() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyItems: 'center', gap: '12px', marginTop: '24px' }}>
-                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyItems: "center",
+                  gap: "12px",
+                  marginTop: "24px",
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                  onClick={() => setShowModal(false)}
+                >
                   İptal
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                >
                   Kaydet
                 </button>
               </div>
@@ -219,7 +335,7 @@ function Tarlalar() {
       )}
 
       {/* Güvenli Silme Onay Modalı */}
-      <DeleteConfirmModal 
+      <DeleteConfirmModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}

@@ -2,7 +2,7 @@ function toCamel(data) {
   if (Array.isArray(data)) {
     return data.map(toCamel);
   }
-  if (data !== null && typeof data === 'object') {
+  if (data !== null && typeof data === "object") {
     return Object.keys(data).reduce((acc, key) => {
       const camelKey = key.replace(/_([a-z0-9])/g, (_, g) => g.toUpperCase());
       acc[camelKey] = toCamel(data[key]);
@@ -13,7 +13,7 @@ function toCamel(data) {
 }
 
 function registerExpenseIpc(registry, { database, schemas }) {
-  registry.handle('masraflar:get-all', () => {
+  registry.handle("masraflar:get-all", () => {
     const sql = `
       SELECT m.*, t.isim AS tarla_isim
       FROM masraflar m
@@ -23,14 +23,15 @@ function registerExpenseIpc(registry, { database, schemas }) {
     return database.query(sql).then(toCamel);
   });
 
-  registry.handle('masraflar:add', (_event, data) => {
+  registry.handle("masraflar:add", (_event, data) => {
     const payload = schemas.expenseSchema.parse(data);
     const tutar = payload.miktar * payload.birim_fiyat;
-    const sql = 'INSERT INTO masraflar (tarla_id, kategori, urun_adi, gubre_marka, gubre_turu, gubre_cesit, miktar, birim, birim_fiyat, tutar, tarih, aciklama) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const sql =
+      "INSERT INTO masraflar (tarla_id, kategori, urun_adi, gubre_marka, gubre_turu, gubre_cesit, miktar, birim, birim_fiyat, tutar, tarih, aciklama) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     return database.run(sql, [
       payload.tarla_id ? parseInt(payload.tarla_id) : null,
       payload.kategori,
-      payload.urun_adi || '',
+      payload.urun_adi || "",
       payload.gubre_marka || null,
       payload.gubre_turu || null,
       payload.gubre_cesit || null,
@@ -39,11 +40,11 @@ function registerExpenseIpc(registry, { database, schemas }) {
       payload.birim_fiyat,
       tutar,
       payload.tarih,
-      payload.aciklama || ''
+      payload.aciklama || "",
     ]);
   });
 
-  registry.handle('masraflar:update', (_event, id, data) => {
+  registry.handle("masraflar:update", (_event, id, data) => {
     const payload = schemas.expenseSchema.parse(data);
     const tutar = payload.miktar * payload.birim_fiyat;
     const sql = `
@@ -55,7 +56,7 @@ function registerExpenseIpc(registry, { database, schemas }) {
     return database.run(sql, [
       payload.tarla_id ? parseInt(payload.tarla_id) : null,
       payload.kategori,
-      payload.urun_adi || '',
+      payload.urun_adi || "",
       payload.gubre_marka || null,
       payload.gubre_turu || null,
       payload.gubre_cesit || null,
@@ -64,13 +65,15 @@ function registerExpenseIpc(registry, { database, schemas }) {
       payload.birim_fiyat,
       tutar,
       payload.tarih,
-      payload.aciklama || '',
-      schemas.idSchema.parse(id)
+      payload.aciklama || "",
+      schemas.idSchema.parse(id),
     ]);
   });
 
-  registry.handle('masraflar:remove', (_event, id) => {
-    return database.run('DELETE FROM masraflar WHERE id = ?', [schemas.idSchema.parse(id)]);
+  registry.handle("masraflar:remove", (_event, id) => {
+    return database.run("DELETE FROM masraflar WHERE id = ?", [
+      schemas.idSchema.parse(id),
+    ]);
   });
 }
 

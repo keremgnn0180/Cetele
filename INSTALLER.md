@@ -52,4 +52,3 @@ npm run installer:portable
 
 - Büyük chunk uyarısı:  
   Çalışmayı engellemez, optimizasyon amaçlıdır.
-

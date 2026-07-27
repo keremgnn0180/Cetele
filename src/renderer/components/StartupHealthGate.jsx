@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import RecoveryMode from './RecoveryMode';
+import React, { useEffect, useState } from "react";
+import RecoveryMode from "./RecoveryMode";
 
 export default function StartupHealthGate({ children }) {
   const [state, setState] = useState({ loading: true, report: null });
@@ -15,9 +15,12 @@ export default function StartupHealthGate({ children }) {
         report: {
           ok: false,
           checks: {
-            IPC: { ok: false, message: error?.message || 'IPC sağlık kontrolü çalışmadı.' }
-          }
-        }
+            IPC: {
+              ok: false,
+              message: error?.message || "IPC sağlık kontrolü çalışmadı.",
+            },
+          },
+        },
       });
     }
   };

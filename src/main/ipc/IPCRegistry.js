@@ -13,7 +13,7 @@ class IPCRegistry {
         this.logger.error(`IPC failed [${channel}]`, error);
         return {
           ok: false,
-          error: this.toPublicError(error)
+          error: this.toPublicError(error),
         };
       }
     });
@@ -21,9 +21,9 @@ class IPCRegistry {
 
   toPublicError(error) {
     if (error?.issues?.length) {
-      return 'Geçersiz veri gönderildi.';
+      return "Geçersiz veri gönderildi.";
     }
-    return error?.message || 'İşlem başarısız oldu.';
+    return error?.message || "İşlem başarısız oldu.";
   }
 }
 

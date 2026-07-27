@@ -1,7 +1,7 @@
-import React from 'react';
-import './SplashScreen.css';
-import leafLogo from '../assets/leaf-logo.svg';
-import appIconPng from '../assets/app-icon.png';
+import React from "react";
+import "./SplashScreen.css";
+import leafLogo from "../assets/leaf-logo.svg";
+import appIconPng from "../assets/app-icon.png";
 
 function SplashScreen() {
   return (

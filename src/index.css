@@ -1,7 +1,9 @@
 /* Yerel Font Sistemi (Offline Desteği) */
 :root {
-  --font-title: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  --font-body: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  --font-title:
+    "Segoe UI", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  --font-body:
+    "Segoe UI", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
 
   /* HSL Tarım Yeşili Renk Şeması */
   --primary-900: hsl(148, 40%, 12%); /* Derin Orman */
@@ -13,14 +15,14 @@
   --primary-300: hsl(148, 55%, 68%); /* Taze Filiz */
   --primary-200: hsl(148, 65%, 82%); /* Nane */
   --primary-100: hsl(148, 70%, 93%); /* Yumuşak Adaçayı */
-  --primary-50:  hsl(148, 75%, 97%); /* Çok Açık Yeşil Arka Plan */
+  --primary-50: hsl(148, 75%, 97%); /* Çok Açık Yeşil Arka Plan */
 
   /* Yardımcı Renkler */
-  --accent: hsl(38, 92%, 50%);       /* Turuncu Başak (Altın) */
-  --success: hsl(142, 60%, 45%);     /* Kazanç Yeşili */
-  --danger: hsl(354, 70%, 54%);      /* Zarar Kırmızısı */
-  --warning: hsl(45, 90%, 52%);      /* Uyarı */
-  --info: hsl(195, 80%, 45%);        /* Bilgi */
+  --accent: hsl(38, 92%, 50%); /* Turuncu Başak (Altın) */
+  --success: hsl(142, 60%, 45%); /* Kazanç Yeşili */
+  --danger: hsl(354, 70%, 54%); /* Zarar Kırmızısı */
+  --warning: hsl(45, 90%, 52%); /* Uyarı */
+  --info: hsl(195, 80%, 45%); /* Bilgi */
 
   /* Nötr Tonlar */
   --slate-900: hsl(210, 24%, 16%);
@@ -35,9 +37,11 @@
   /* Gölgeler ve Yuvarlamalar */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 12px rgba(11, 32, 20, 0.06);
-  --shadow-lg: 0 10px 25px -5px rgba(11, 32, 20, 0.1), 0 8px 10px -6px rgba(11, 32, 20, 0.1);
+  --shadow-lg:
+    0 10px 25px -5px rgba(11, 32, 20, 0.1),
+    0 8px 10px -6px rgba(11, 32, 20, 0.1);
   --shadow-xl: 0 20px 40px -10px rgba(11, 32, 20, 0.15);
-  
+
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 20px;
@@ -56,14 +60,24 @@
 
 body {
   font-family: var(--font-body);
-  background: radial-gradient(circle at 10% 10%, #f4fbf6 0%, #f3f5f8 45%, #eef1f4 100%);
+  background: radial-gradient(
+    circle at 10% 10%,
+    #f4fbf6 0%,
+    #f3f5f8 45%,
+    #eef1f4 100%
+  );
   color: var(--slate-900);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-title);
   font-weight: 700;
   color: var(--primary-900);
@@ -550,10 +564,22 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
 
-.soft-green { background: #e9f8ee; color: #22a45d; }
-.soft-gold { background: #fff6df; color: #d68910; }
-.soft-purple { background: #f2ecff; color: #7e57c2; }
-.soft-blue { background: #e9f4ff; color: #2f7dd8; }
+.soft-green {
+  background: #e9f8ee;
+  color: #22a45d;
+}
+.soft-gold {
+  background: #fff6df;
+  color: #d68910;
+}
+.soft-purple {
+  background: #f2ecff;
+  color: #7e57c2;
+}
+.soft-blue {
+  background: #e9f4ff;
+  color: #2f7dd8;
+}
 
 .dashboard-panels {
   margin-top: 8px;
@@ -643,13 +669,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-600) 0%,
+    var(--primary-700) 100%
+  );
   color: var(--white);
   box-shadow: 0 4px 10px rgba(45, 106, 79, 0.15);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-500) 0%,
+    var(--primary-600) 100%
+  );
   box-shadow: 0 6px 16px rgba(45, 106, 79, 0.25);
   transform: translateY(-2px);
 }
@@ -667,7 +701,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, var(--danger) 0%, hsl(354, 60%, 46%) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--danger) 0%,
+    hsl(354, 60%, 46%) 100%
+  );
   color: var(--white);
 }
 
@@ -931,7 +969,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stat-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1009,13 +1047,23 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .empty-state {
@@ -1039,7 +1087,8 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   /* Arka planları beyaz yap ve genel renkleri siyah yap */
-  body, html {
+  body,
+  html {
     background-color: #ffffff !important;
     background: #ffffff !important;
     color: #000000 !important;
@@ -1211,11 +1260,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes modalFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modalSlideUp {
-  from { transform: translateY(24px) scale(0.96); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
+  from {
+    transform: translateY(24px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }

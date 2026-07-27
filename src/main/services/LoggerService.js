@@ -1,8 +1,8 @@
-const log = require('electron-log');
+const log = require("electron-log");
 
 class LoggerService {
   constructor() {
-    log.transports.file.level = 'info';
+    log.transports.file.level = "info";
     log.transports.file.maxSize = 1024 * 1024;
   }
 
@@ -27,7 +27,7 @@ class LoggerService {
       debug: (...args) => this.debug(`[${scope}]`, ...args),
       info: (...args) => this.info(`[${scope}]`, ...args),
       warn: (...args) => this.warn(`[${scope}]`, ...args),
-      error: (...args) => this.error(`[${scope}]`, ...args)
+      error: (...args) => this.error(`[${scope}]`, ...args),
     };
   }
 }

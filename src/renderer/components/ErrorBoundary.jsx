@@ -1,5 +1,5 @@
-import React from 'react';
-import CrashScreen from './CrashScreen';
+import React from "react";
+import CrashScreen from "./CrashScreen";
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -12,7 +12,7 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('Renderer crash captured:', error, info);
+    console.error("Renderer crash captured:", error, info);
   }
 
   render() {

@@ -1,8 +1,14 @@
 function registerReportIpc(registry, { database }) {
-  registry.handle('raporlar:get-summary', () => {
-    const tarlalarRes = database.query('SELECT COUNT(*) AS count, SUM(donum) AS totalDonum FROM tarlalar');
-    const masraflarRes = database.query('SELECT SUM(tutar) AS total FROM masraflar');
-    const hasatlarRes = database.query('SELECT SUM(gelir) AS total FROM hasatlar');
+  registry.handle("raporlar:get-summary", () => {
+    const tarlalarRes = database.query(
+      "SELECT COUNT(*) AS count, SUM(donum) AS totalDonum FROM tarlalar",
+    );
+    const masraflarRes = database.query(
+      "SELECT SUM(tutar) AS total FROM masraflar",
+    );
+    const hasatlarRes = database.query(
+      "SELECT SUM(gelir) AS total FROM hasatlar",
+    );
 
     const monthlyExpenses = database.query(`
       SELECT strftime('%Y-%m', tarih) AS ay, SUM(tutar) AS total
@@ -20,7 +26,9 @@ function registerReportIpc(registry, { database }) {
       LIMIT 12
     `);
 
-    const catExpenses = database.query('SELECT kategori, SUM(tutar) AS total FROM masraflar GROUP BY kategori');
+    const catExpenses = database.query(
+      "SELECT kategori, SUM(tutar) AS total FROM masraflar GROUP BY kategori",
+    );
 
     const recentActivities = database.query(`
       SELECT * FROM (
@@ -42,7 +50,9 @@ function registerReportIpc(registry, { database }) {
       LIMIT 8
     `);
 
-    const fieldPerformances = database.query(`
+    const fieldPerformances = database
+      .query(
+        `
       SELECT
         t.id,
         t.isim,
@@ -58,10 +68,12 @@ function registerReportIpc(registry, { database }) {
         SELECT tarla_id, SUM(gelir) AS total FROM hasatlar GROUP BY tarla_id
       ) hr ON hr.tarla_id = t.id
       ORDER BY profit DESC
-    `).map((item) => ({
-      ...item,
-      profitPerDonum: item.donum > 0 ? item.profit / item.donum : 0
-    }));
+    `,
+      )
+      .map((item) => ({
+        ...item,
+        profitPerDonum: item.donum > 0 ? item.profit / item.donum : 0,
+      }));
 
     const totalExpenses = masraflarRes[0]?.total || 0;
     const totalRevenue = hasatlarRes[0]?.total || 0;
@@ -76,7 +88,7 @@ function registerReportIpc(registry, { database }) {
       monthlyExpenses,
       monthlyRevenue,
       recentActivities,
-      fieldPerformances
+      fieldPerformances,
     };
   });
 }

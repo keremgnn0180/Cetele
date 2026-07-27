@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Printer } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Printer } from "lucide-react";
 
 function Raporlar() {
   const formatDate = (value) => {
-    if (!value) return '-';
+    if (!value) return "-";
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleDateString('tr-TR');
+    return date.toLocaleDateString("tr-TR");
   };
 
   const [loading, setLoading] = useState(true);
@@ -14,7 +14,7 @@ function Raporlar() {
     totalIncome: 0,
     totalExpense: 0,
     netProfit: 0,
-    categoryExpenses: []
+    categoryExpenses: [],
   });
   const [expenseDetails, setExpenseDetails] = useState([]);
 
@@ -23,7 +23,7 @@ function Raporlar() {
     try {
       const [summaryRes, masraflarRes] = await Promise.all([
         window.api.raporlar.getSummary(),
-        window.api.masraflar.getAll()
+        window.api.masraflar.getAll(),
       ]);
 
       setSummary({
@@ -32,29 +32,31 @@ function Raporlar() {
         netProfit: summaryRes?.netProfit || 0,
         categoryExpenses: (summaryRes?.catExpenses || []).map((x) => ({
           kategori: x.kategori,
-          tutar: x.total || 0
-        }))
+          tutar: x.total || 0,
+        })),
       });
 
       const normalized = (masraflarRes || []).map((x) => ({
         id: x.id,
-        tarihRaw: x.tarih || '',
+        tarihRaw: x.tarih || "",
         tarih: formatDate(x.tarih),
-        kategori: x.kategori || '-',
-        urunAdi: x.urun_adi || '-',
-        gubreMarka: x.gubre_marka || '-',
-        gubreTuru: x.gubre_turu || '-',
-        gubreCesit: x.gubre_cesit || '-',
+        kategori: x.kategori || "-",
+        urunAdi: x.urun_adi || "-",
+        gubreMarka: x.gubre_marka || "-",
+        gubreTuru: x.gubre_turu || "-",
+        gubreCesit: x.gubre_cesit || "-",
         miktar: Number(x.miktar || 0),
-        birim: x.birim || '-',
+        birim: x.birim || "-",
         birimFiyat: Number(x.birim_fiyat || 0),
-        tutar: Number(x.tutar || 0)
+        tutar: Number(x.tutar || 0),
       }));
 
-      normalized.sort((a, b) => String(b.tarihRaw).localeCompare(String(a.tarihRaw)));
+      normalized.sort((a, b) =>
+        String(b.tarihRaw).localeCompare(String(a.tarihRaw)),
+      );
       setExpenseDetails(normalized);
     } catch (err) {
-      console.error('Rapor verileri çekilirken hata oluştu:', err);
+      console.error("Rapor verileri çekilirken hata oluştu:", err);
     } finally {
       setLoading(false);
     }
@@ -65,39 +67,44 @@ function Raporlar() {
   }, []);
 
   const renderListHtml = () => {
-    const reportDate = new Date().toLocaleDateString('tr-TR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+    const reportDate = new Date().toLocaleDateString("tr-TR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     });
 
-    const categoryItems = summary.categoryExpenses.length === 0
-      ? '<li>Masraf kaydı bulunmuyor.</li>'
-      : summary.categoryExpenses
-          .map((item) => `<li><strong>${item.kategori}:</strong> ${item.tutar.toLocaleString('tr-TR')} TL</li>`)
-          .join('');
+    const categoryItems =
+      summary.categoryExpenses.length === 0
+        ? "<li>Masraf kaydı bulunmuyor.</li>"
+        : summary.categoryExpenses
+            .map(
+              (item) =>
+                `<li><strong>${item.kategori}:</strong> ${item.tutar.toLocaleString("tr-TR")} TL</li>`,
+            )
+            .join("");
 
-    const expenseItems = expenseDetails.length === 0
-      ? '<li>Detay masraf kaydı bulunmuyor.</li>'
-      : expenseDetails
-          .map(
-            (item) => `
+    const expenseItems =
+      expenseDetails.length === 0
+        ? "<li>Detay masraf kaydı bulunmuyor.</li>"
+        : expenseDetails
+            .map(
+              (item) => `
               <li style="margin-bottom:4px; padding:5px 7px; border:1px solid #e5e7eb; border-radius:6px;">
                 <div style="display:flex; justify-content:space-between; gap:10px; font-weight:700;">
                   <span>${item.tarih} • ${item.kategori}</span>
-                  <span>${item.tutar.toLocaleString('tr-TR')} TL</span>
+                  <span>${item.tutar.toLocaleString("tr-TR")} TL</span>
                 </div>
                 <div style="margin-top:2px;"><strong>Ürün:</strong> ${item.urunAdi}</div>
                 <div style="margin-top:1px; color:#374151;">
                   <strong>Marka:</strong> ${item.gubreMarka} | <strong>Tür:</strong> ${item.gubreTuru} | <strong>Çeşit:</strong> ${item.gubreCesit}
                 </div>
                 <div style="margin-top:1px; color:#374151;">
-                  <strong>Miktar:</strong> ${item.miktar.toLocaleString('tr-TR')} ${item.birim} | <strong>Birim Fiyat:</strong> ${item.birimFiyat.toLocaleString('tr-TR')} TL
+                  <strong>Miktar:</strong> ${item.miktar.toLocaleString("tr-TR")} ${item.birim} | <strong>Birim Fiyat:</strong> ${item.birimFiyat.toLocaleString("tr-TR")} TL
                 </div>
               </li>
-            `
-          )
-          .join('');
+            `,
+            )
+            .join("");
 
     return `
       <!doctype html>
@@ -164,10 +171,10 @@ function Raporlar() {
         <hr />
         <h2>Finansal Özet</h2>
         <ul>
-          <li><strong>Toplam Satış Geliri:</strong> ${summary.totalIncome.toLocaleString('tr-TR')} TL</li>
-          <li><strong>Toplam Gider / Masraf:</strong> ${summary.totalExpense.toLocaleString('tr-TR')} TL</li>
-          <li><strong>Net Kar / Zarar:</strong> ${summary.netProfit.toLocaleString('tr-TR')} TL</li>
-          <li><strong>Durum:</strong> ${summary.netProfit >= 0 ? 'Karda' : 'Zararda'}</li>
+          <li><strong>Toplam Satış Geliri:</strong> ${summary.totalIncome.toLocaleString("tr-TR")} TL</li>
+          <li><strong>Toplam Gider / Masraf:</strong> ${summary.totalExpense.toLocaleString("tr-TR")} TL</li>
+          <li><strong>Net Kar / Zarar:</strong> ${summary.netProfit.toLocaleString("tr-TR")} TL</li>
+          <li><strong>Durum:</strong> ${summary.netProfit >= 0 ? "Karda" : "Zararda"}</li>
         </ul>
         <h3>Kategori Bazlı Masraflar</h3>
         <ul>${categoryItems}</ul>
@@ -180,7 +187,7 @@ function Raporlar() {
 
   const handlePrint = () => {
     const html = renderListHtml();
-    const printWindow = window.open('', '_blank', 'width=900,height=800');
+    const printWindow = window.open("", "_blank", "width=900,height=800");
     if (!printWindow) return;
     printWindow.document.open();
     printWindow.document.write(html);
@@ -192,22 +199,39 @@ function Raporlar() {
 
   useEffect(() => {
     const onKeyDown = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'p') {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "p") {
         event.preventDefault();
         handlePrint();
       }
     };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [summary, expenseDetails]);
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px', color: 'var(--slate-500)' }}>Raporlar yükleniyor...</div>;
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "40px",
+          color: "var(--slate-500)",
+        }}
+      >
+        Raporlar yükleniyor...
+      </div>
+    );
   }
 
   return (
     <div>
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+      <div
+        className="no-print"
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: "20px",
+        }}
+      >
         <button className="btn btn-primary btn-large" onClick={handlePrint}>
           <Printer size={20} />
           <span>Raporu Yazdır / PDF Kaydet</span>
@@ -215,42 +239,80 @@ function Raporlar() {
       </div>
 
       <div className="card">
-        <h2 style={{ marginBottom: '10px' }}>Finansal Özet (Liste)</h2>
+        <h2 style={{ marginBottom: "10px" }}>Finansal Özet (Liste)</h2>
         <ul style={{ lineHeight: 1.8 }}>
-          <li><strong>Toplam Satış Geliri:</strong> {summary.totalIncome.toLocaleString('tr-TR')} TL</li>
-          <li><strong>Toplam Gider / Masraf:</strong> {summary.totalExpense.toLocaleString('tr-TR')} TL</li>
-          <li><strong>Net Kar / Zarar:</strong> {summary.netProfit.toLocaleString('tr-TR')} TL</li>
-          <li><strong>Durum:</strong> {summary.netProfit >= 0 ? 'Karda' : 'Zararda'}</li>
+          <li>
+            <strong>Toplam Satış Geliri:</strong>{" "}
+            {summary.totalIncome.toLocaleString("tr-TR")} TL
+          </li>
+          <li>
+            <strong>Toplam Gider / Masraf:</strong>{" "}
+            {summary.totalExpense.toLocaleString("tr-TR")} TL
+          </li>
+          <li>
+            <strong>Net Kar / Zarar:</strong>{" "}
+            {summary.netProfit.toLocaleString("tr-TR")} TL
+          </li>
+          <li>
+            <strong>Durum:</strong>{" "}
+            {summary.netProfit >= 0 ? "Karda" : "Zararda"}
+          </li>
         </ul>
 
-        <h3 style={{ marginTop: '10px' }}>Kategori Bazlı Masraflar</h3>
+        <h3 style={{ marginTop: "10px" }}>Kategori Bazlı Masraflar</h3>
         <ul style={{ lineHeight: 1.7 }}>
           {summary.categoryExpenses.length === 0 ? (
             <li>Masraf kaydı bulunmuyor.</li>
           ) : (
             summary.categoryExpenses.map((item) => (
-              <li key={item.kategori}><strong>{item.kategori}:</strong> {item.tutar.toLocaleString('tr-TR')} TL</li>
+              <li key={item.kategori}>
+                <strong>{item.kategori}:</strong>{" "}
+                {item.tutar.toLocaleString("tr-TR")} TL
+              </li>
             ))
           )}
         </ul>
 
-        <h3 style={{ marginTop: '10px' }}>Gider Detayları</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <h3 style={{ marginTop: "10px" }}>Gider Detayları</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {expenseDetails.length === 0 ? (
             <div>Detay masraf kaydı bulunmuyor.</div>
           ) : (
             expenseDetails.map((item) => (
-              <div key={item.id} style={{ border: '1px solid var(--slate-300)', borderRadius: '10px', padding: '12px 14px', background: 'var(--white)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', fontWeight: 700 }}>
-                  <span>{item.tarih} • {item.kategori}</span>
-                  <span>{item.tutar.toLocaleString('tr-TR')} TL</span>
+              <div
+                key={item.id}
+                style={{
+                  border: "1px solid var(--slate-300)",
+                  borderRadius: "10px",
+                  padding: "12px 14px",
+                  background: "var(--white)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    fontWeight: 700,
+                  }}
+                >
+                  <span>
+                    {item.tarih} • {item.kategori}
+                  </span>
+                  <span>{item.tutar.toLocaleString("tr-TR")} TL</span>
                 </div>
-                <div style={{ marginTop: '6px' }}><strong>Ürün:</strong> {item.urunAdi}</div>
-                <div style={{ marginTop: '4px', color: 'var(--slate-700)' }}>
-                  <strong>Marka:</strong> {item.gubreMarka} | <strong>Tür:</strong> {item.gubreTuru} | <strong>Çeşit:</strong> {item.gubreCesit}
+                <div style={{ marginTop: "6px" }}>
+                  <strong>Ürün:</strong> {item.urunAdi}
                 </div>
-                <div style={{ marginTop: '4px', color: 'var(--slate-700)' }}>
-                  <strong>Miktar:</strong> {item.miktar.toLocaleString('tr-TR')} {item.birim} | <strong>Birim Fiyat:</strong> {item.birimFiyat.toLocaleString('tr-TR')} TL
+                <div style={{ marginTop: "4px", color: "var(--slate-700)" }}>
+                  <strong>Marka:</strong> {item.gubreMarka} |{" "}
+                  <strong>Tür:</strong> {item.gubreTuru} |{" "}
+                  <strong>Çeşit:</strong> {item.gubreCesit}
+                </div>
+                <div style={{ marginTop: "4px", color: "var(--slate-700)" }}>
+                  <strong>Miktar:</strong> {item.miktar.toLocaleString("tr-TR")}{" "}
+                  {item.birim} | <strong>Birim Fiyat:</strong>{" "}
+                  {item.birimFiyat.toLocaleString("tr-TR")} TL
                 </div>
               </div>
             ))
