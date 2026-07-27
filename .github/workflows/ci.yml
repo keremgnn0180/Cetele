@@ -22,13 +22,13 @@ jobs:
           cache: npm
 
       - name: Paketleri yükle
-        run: npm ci
+        run: npm install
+
+      - name: Build
+        run: npm run build -- --publish never
 
       - name: ESLint
         run: npm run lint
 
       - name: Testler
         run: npm test
-
-      - name: Build
-        run: npm run build
