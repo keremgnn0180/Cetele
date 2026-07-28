@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"electron .\"",
     "vite-build": "vite build",
-    "build": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder",
+    "build": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --publish never",
     "build:release": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder -c.win.signAndEditExecutable=true",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -53,6 +53,7 @@
     "jsdom": "^29.1.1",
     "png-to-ico": "^2.1.8",
     "prettier": "3.9.6",
+    "rollup-plugin-visualizer": "^7.0.1",
     "sharp": "^0.34.5",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",

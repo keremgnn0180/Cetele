@@ -2,15 +2,27 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  base: "./", // Electron'un file:// protokolü üzerinden yükleyebilmesi için görece (relative) yollar şarttır
-  server: {
-    port: 5173,
-    strictPort: true,
-  },
-  build: {
-    outDir: "dist",
-    emptyOutDir: true,
-  },
+export default defineConfig(async () => {
+  const { visualizer } = await import("rollup-plugin-visualizer");
+
+  return {
+    plugins: [
+      react(),
+      visualizer({
+        filename: "stats.html",
+        open: true,
+        gzipSize: true,
+        brotliSize: true,
+      }),
+    ],
+    base: "./",
+    server: {
+      port: 5173,
+      strictPort: true,
+    },
+    build: {
+      outDir: "dist",
+      emptyOutDir: true,
+    },
+  };
 });
