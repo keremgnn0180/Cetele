@@ -1,13 +1,19 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
+console.log("PRELOAD ÇALIŞTI");
+console.log("✅ PRELOAD BAŞLADI");
+
 async function invoke(channel, ...args) {
   const response = await ipcRenderer.invoke(channel, ...args);
+
   if (!response || typeof response !== "object" || !("ok" in response)) {
     return response;
   }
+
   if (!response.ok) {
     throw new Error(response.error || "İşlem başarısız oldu.");
   }
+
   return response.data;
 }
 
@@ -53,12 +59,17 @@ contextBridge.exposeInMainWorld("api", {
     getSummary: () => invoke("raporlar:get-summary"),
   },
 
+  pdf: {
+    export: (html) => invoke("pdf:export", html),
+  },
+
   backup: {
     export: () => invoke("backup:export"),
     import: () => invoke("backup:import"),
     getBackups: () => invoke("backup:get-list"),
     createManual: () => invoke("backup:create-manual"),
-    restoreFromPath: (filePath) => invoke("backup:restore-from-path", filePath),
+    restoreFromPath: (filePath) =>
+      invoke("backup:restore-from-path", filePath),
   },
 
   health: {
@@ -67,9 +78,14 @@ contextBridge.exposeInMainWorld("api", {
 
   checkUpdates: () => invoke("check-updates"),
   getUpdateState: () => invoke("updates:get-state"),
+
   onUpdateAvailable: (callback) => on("update:available", callback),
   onDownloadProgress: (callback) => on("update:download-progress", callback),
   onUpdateDownloaded: (callback) => on("update:downloaded", callback),
-  onUpdateNotAvailable: (callback) => on("update:not-available", callback),
+  onUpdateNotAvailable: (callback) =>
+    on("update:not-available", callback),
   onUpdateError: (callback) => on("update:error", callback),
 });
+
+console.log("window.api exposed");
+console.log("✅ window.api expose edildi");

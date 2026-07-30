@@ -1,4 +1,4 @@
-const { app, Notification, dialog } = require("electron");
+const { app, Notification } = require("electron");
 
 class UpdateService {
   constructor({ getMainWindow, logger }) {
@@ -7,7 +7,10 @@ class UpdateService {
     this.autoUpdater = null;
     this.lastCheck = null;
     this.status = "Hazır";
-    this.isDialogVisible = false;
+    this.isSetup = false;
+    this.installTimer = null;
+    this.pendingInstall = false;
+    this.installDelayMs = 10000;
 
     try {
       this.autoUpdater = require("electron-updater").autoUpdater;
@@ -18,32 +21,41 @@ class UpdateService {
         "Cache-Control": "no-cache",
         Pragma: "no-cache",
       };
+      this.logger.info("Auto updater initialized");
     } catch (err) {
       this.logger.warn("Auto updater yüklenemedi:", err.message);
     }
   }
 
   setup() {
-    if (!this.autoUpdater) return;
+    if (!this.autoUpdater || this.isSetup) return;
+    this.isSetup = true;
 
     this.autoUpdater.on("checking-for-update", () => {
       this.status = "Kontrol ediliyor";
+      this.logger.info("Checking for updates");
       this.send("update:checking-for-update", {
         checkedAt: new Date().toISOString(),
       });
     });
 
     this.autoUpdater.on("update-available", (info) => {
-      this.status = "Güncelleme bulundu";
+      this.status = "Güncelleme indiriliyor";
+      this.logger.info("Update available, background download started", {
+        version: info?.version,
+        releaseDate: info?.releaseDate,
+      });
       this.send("update:available", {
         version: info?.version || null,
         releasedAt: info?.releaseDate || null,
       });
-      this.notify("Yeni güncelleme bulundu", "Çetele yeni sürümü indiriyor...");
     });
 
     this.autoUpdater.on("update-not-available", (info) => {
       this.status = "Güncel";
+      this.logger.info("No updates available", {
+        version: info?.version || app.getVersion(),
+      });
       this.send("update:not-available", {
         checkedAt: new Date().toISOString(),
         version: info?.version || app.getVersion(),
@@ -55,17 +67,27 @@ class UpdateService {
         ? Math.round(progress.percent)
         : 0;
       this.status = `İndiriliyor (%${percent})`;
+      this.logger.debug("Update download progress", {
+        percent,
+        transferred: progress?.transferred,
+        total: progress?.total,
+      });
       this.send("update:download-progress", { percent });
     });
 
-    this.autoUpdater.on("update-downloaded", async (info) => {
+    this.autoUpdater.on("update-downloaded", (info) => {
       this.status = "Güncelleme hazır";
+      this.pendingInstall = true;
+      this.logger.info("Update downloaded, scheduling restart", {
+        version: info?.version,
+        delayMs: this.installDelayMs,
+      });
       this.send("update:downloaded", { version: info?.version || null });
       this.notify(
         "Güncelleme hazır",
-        "Uygulama kapatıldığında yeni sürüm kurulacak.",
+        "Çetele birazdan yeniden başlatılıp yeni sürümü kuracak.",
       );
-      await this.promptInstall();
+      this.scheduleInstall();
     });
 
     this.autoUpdater.on("error", (err) => {
@@ -79,6 +101,7 @@ class UpdateService {
 
   async check(source = "manual") {
     this.lastCheck = new Date().toISOString();
+    this.logger.info("Update check requested", { source });
 
     if (!this.autoUpdater) {
       this.status = "Updater modülü yüklenemedi";
@@ -87,6 +110,7 @@ class UpdateService {
 
     if (!app.isPackaged) {
       this.status = "Geliştirme modunda atlandı";
+      this.logger.info("Update check skipped in development mode");
       this.send("update:not-available", {
         checkedAt: this.lastCheck,
         version: app.getVersion(),
@@ -95,10 +119,7 @@ class UpdateService {
       return { ok: true, skipped: true, reason: "dev-mode" };
     }
 
-    const result =
-      source === "startup"
-        ? await this.autoUpdater.checkForUpdatesAndNotify()
-        : await this.autoUpdater.checkForUpdates();
+    const result = await this.autoUpdater.checkForUpdates();
 
     return { ok: true, updateInfo: result?.updateInfo || null };
   }
@@ -108,6 +129,7 @@ class UpdateService {
       currentVersion: `v${app.getVersion()}`,
       lastCheck: this.lastCheck,
       status: this.status,
+      pendingInstall: this.pendingInstall,
     };
   }
 
@@ -126,23 +148,26 @@ class UpdateService {
     }
   }
 
-  async promptInstall() {
-    if (this.isDialogVisible || !this.autoUpdater) return;
-    this.isDialogVisible = true;
-    try {
-      const result = await dialog.showMessageBox({
-        type: "info",
-        buttons: ["Şimdi Yeniden Başlat", "Daha Sonra"],
-        defaultId: 0,
-        cancelId: 1,
-        title: "Çetele",
-        message: "Uygulama yeniden başlatıldığında yeni sürüm kurulacak.",
-        detail: "Güncellemeyi şimdi kurmak için yeniden başlatabilirsiniz.",
+  scheduleInstall() {
+    if (!this.autoUpdater || this.installTimer) return;
+
+    this.installTimer = setTimeout(() => {
+      this.status = "Güncelleme kuruluyor";
+      this.logger.info("Restarting app to install update");
+      this.send("update:installing", {
+        installingAt: new Date().toISOString(),
       });
-      if (result.response === 0) this.autoUpdater.quitAndInstall();
-    } finally {
-      this.isDialogVisible = false;
-    }
+
+      try {
+        this.autoUpdater.quitAndInstall(false, true);
+      } catch (err) {
+        this.status = "Hata";
+        this.logger.error("quitAndInstall failed:", err);
+        this.send("update:error", {
+          message: err?.message || "Güncelleme kurulumu başlatılamadı",
+        });
+      }
+    }, this.installDelayMs);
   }
 }
 

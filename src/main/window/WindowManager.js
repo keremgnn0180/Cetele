@@ -11,6 +11,9 @@ class WindowManager {
   }
 
   createMainWindow() {
+    console.log("Creating BrowserWindow...");
+    console.log("Preload:", path.join(this.rootDir, "preload.js"));
+
     this.mainWindow = new BrowserWindow({
       width: 1200,
       height: 800,
@@ -33,7 +36,10 @@ class WindowManager {
     this.attachFailureHandlers();
     this.loadApp();
 
-    this.mainWindow.once("ready-to-show", () => this.mainWindow.show());
+    this.mainWindow.once("ready-to-show", () => {
+      this.mainWindow.show();
+    });
+
     this.mainWindow.on("closed", () => {
       this.mainWindow = null;
     });
@@ -45,33 +51,60 @@ class WindowManager {
     this.mainWindow.webContents.on(
       "did-fail-load",
       (_event, errorCode, errorDescription) => {
-        this.logger.error("LOAD ERROR:", errorCode, errorDescription);
-        this.loadRecovery();
-      },
+        console.error("LOAD ERROR:", errorCode, errorDescription);
+
+        if (!this.isDev) {
+          this.loadRecovery();
+        }
+      }
     );
 
-    this.mainWindow.webContents.on("render-process-gone", (_event, details) => {
-      this.logger.error("Renderer process gone:", details);
-      this.loadRecovery();
-    });
+    this.mainWindow.webContents.on(
+      "render-process-gone",
+      (_event, details) => {
+        console.error("Renderer process gone:", details);
+
+        if (!this.isDev) {
+          this.loadRecovery();
+        }
+      }
+    );
+
+    this.mainWindow.webContents.on(
+      "did-finish-load",
+      () => {
+        console.log("Renderer loaded successfully.");
+      }
+    );
   }
 
   loadApp() {
     if (this.isDev) {
-      this.mainWindow.loadURL("http://localhost:5173");
+      console.log("Loading:", "http://localhost:5173");
+
+      this.mainWindow
+        .loadURL("http://localhost:5173")
+        .catch((err) => console.error("loadURL failed:", err));
+
       this.mainWindow.webContents.openDevTools();
+
       return;
     }
 
-    this.mainWindow.loadFile(path.join(this.rootDir, "dist", "index.html"));
+    const file = path.join(this.rootDir, "dist", "index.html");
+    console.log("Loading:", file);
+
+    this.mainWindow.loadFile(file);
   }
 
   loadRecovery() {
-    if (!this.isDev && this.mainWindow && !this.mainWindow.isDestroyed()) {
-      this.mainWindow.loadFile(
-        path.join(this.rootDir, "dist", "recovery.html"),
-      );
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+      return;
     }
+
+    this.mainWindow.loadFile(
+      path.join(this.rootDir, "dist", "recovery.html")
+    );
   }
 
   getMainWindow() {

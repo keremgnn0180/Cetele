@@ -44,18 +44,11 @@ function App() {
 
   useEffect(() => {
     const unsubs = [
-      window.api.onUpdateAvailable((payload) => {
-        setUpdatePopup({
-          open: true,
-          version: payload?.version || "",
-          status: "Yeni güncelleme bulundu.",
-        });
-      }),
       window.api.onUpdateDownloaded((payload) => {
         setUpdatePopup({
           open: true,
           version: payload?.version || "",
-          status: "Güncelleme indirildi ve kuruluma hazır.",
+          status: "Güncelleme hazır. Çetele birazdan yeniden başlatılıp kurulumu tamamlayacak.",
         });
       }),
     ];

@@ -4,7 +4,7 @@
   "description": "Modern ve sade masaüstü Çetele uygulaması",
   "main": "main.js",
   "scripts": {
-    "dev": "concurrently \"vite\" \"electron .\"",
+    "dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
     "vite-build": "vite build",
     "build": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder --publish never",
     "build:release": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){};try{fs.rmSync('release',{recursive:true,force:true})}catch(e){};\" && npm run vite-build && electron-builder -c.win.signAndEditExecutable=true",
@@ -26,10 +26,12 @@
     "electron-log": "^5.4.4",
     "electron-updater": "^6.3.9",
     "lucide-react": "^0.468.0",
+    "pdfmake": "^0.3.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.15.0",
     "sql.js": "^1.12.0",
+    "vite-plugin-static-copy": "^4.1.1",
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
@@ -43,6 +45,7 @@
     "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
     "electron": "34.0.2",
     "electron-builder": "24.13.3",
     "eslint": "^9.39.1",
@@ -58,7 +61,8 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",
     "vite": "^6.0.5",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "wait-on": "^9.1.0"
   },
   "keywords": [
     "tarla",
